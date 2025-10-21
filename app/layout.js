@@ -1,7 +1,9 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/ui/theme-provider";
-
+import { ThemeProvider } from "@/components/theme-provider";
+import { Header } from "@/components/header";
+import { ClerkProvider } from "@clerk/nextjs";
+import {dark} from '@clerk/themes';
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 
@@ -14,18 +16,21 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
+    <ClerkProvider appearance={{
+      baseTheme: dark,
+    }}>
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${inter.className} antialiased`}
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >
           {/* header */}
-
+          <Header />
           <main className="min-h-screen">{children}</main>
 
           <footer>
@@ -38,5 +43,6 @@ export default function RootLayout({ children }) {
         </ThemeProvider>
       </body>
     </html>
+    </ClerkProvider>
   );
 }
