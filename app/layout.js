@@ -1,5 +1,6 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/ui/theme-provider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -13,21 +14,28 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${inter.className} antialiased`}
       >
-        {/* header */}
-        
-        <main className="min-h-screen">{children}</main>
-        
-        <footer>
-          <div className="text-center py-4 border-t">
-            <p className="text-sm text-gray-500">
-              &copy; {new Date().getFullYear()} PawCare. All rights reserved.
-            </p>
-          </div>
-        </footer>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {/* header */}
+
+          <main className="min-h-screen">{children}</main>
+
+          <footer>
+            <div className="container text-center py-4 border-t text-white border-gray-300 mt-8">
+              <p className="text-sm text-white-500">
+                &copy; {new Date().getFullYear()} PawCare. All rights reserved.
+              </p>
+            </div>
+          </footer>
+        </ThemeProvider>
       </body>
     </html>
   );
