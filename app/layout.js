@@ -35,9 +35,58 @@ export default function RootLayout({ children }) {
             <main className="min-h-screen">{children}</main>
             <Toaster richColors />
 
-            <footer className="bg-muted/50 py-12">
-              <div className="container mx-auto px-4 text-center text-gray-200">
-                <p>Made with 💗 by RoadsideCoder</p>
+            <footer className="bg-background border-t">
+              <div className="container mx-auto px-4 py-12">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                  {/* Company Info */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <img src="/logo-single.png" alt="PawCare" className="h-8 w-auto" />
+                      <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent font-bold text-xl">
+                        PawCare
+                      </span>
+                    </div>
+                    <p className="text-muted-foreground text-sm">
+                      Connecting pets with quality veterinary care, anytime, anywhere.
+                    </p>
+                  </div>
+
+                  {/* Quick Links */}
+                  <div>
+                    <h3 className="font-semibold mb-4">Quick Links</h3>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li><a href="/about" className="hover:text-primary">About Us</a></li>
+                      <li><a href="/services" className="hover:text-primary">Our Services</a></li>
+                      <li><a href="/doctors" className="hover:text-primary">Find a Vet</a></li>
+                      <li><a href="/contact" className="hover:text-primary">Contact</a></li>
+                    </ul>
+                  </div>
+
+                  {/* Services */}
+                  <div>
+                    <h3 className="font-semibold mb-4">Services</h3>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li><a href="/appointments" className="hover:text-primary">Book Appointment</a></li>
+                      <li><a href="/emergency" className="hover:text-primary">Emergency Care</a></li>
+                      <li><a href="/telemedicine" className="hover:text-primary">Video Consultation</a></li>
+                      <li><a href="/pharmacy" className="hover:text-primary">Pet Pharmacy</a></li>
+                    </ul>
+                  </div>
+
+                  {/* Contact Info */}
+                  <div>
+                    <h3 className="font-semibold mb-4">Contact Us</h3>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li>support@pawcare.com</li>
+                      <li>+1 (555) 123-4567</li>
+                      <li>Mon - Sat: 9:00 AM - 8:00 PM</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="border-t mt-12 pt-8 text-center text-sm text-muted-foreground">
+                  <p>© {new Date().getFullYear()} PawCare. All rights reserved.</p>
+                </div>
               </div>
             </footer>
           </ThemeProvider>

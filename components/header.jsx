@@ -19,7 +19,7 @@ export function Header() {
         <Link href="/" className="flex items-center gap-2 cursor-pointer">
           <Image
             src="/logo-single.png"
-            alt="Medimeet Logo"
+            alt="PawCare Logo"
             width={200}
             height={60}
             className="h-10 w-auto object-contain"
