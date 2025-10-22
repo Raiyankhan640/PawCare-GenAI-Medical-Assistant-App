@@ -99,7 +99,7 @@ export async function Header() {
             )}
           </SignedIn>
 
-          {/* {(!user || user?.role !== "ADMIN") && (
+          {(!user || user?.role !== "ADMIN") && (
             <Link href={user?.role === "PATIENT" ? "/pricing" : "/doctor"}>
               <Badge
                 variant="outline"
@@ -122,7 +122,7 @@ export async function Header() {
                 </span>
               </Badge>
             </Link>
-          )} */}
+          )}
 
           <SignedOut>
             <SignInButton>
