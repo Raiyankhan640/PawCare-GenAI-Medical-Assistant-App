@@ -24,6 +24,9 @@ export function Header() {
             height={60}
             className="h-10 w-auto object-contain"
           />
+          <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent font-bold text-2xl">
+            PawCare
+          </span>
         </Link>
 
         {/* Action Buttons */}

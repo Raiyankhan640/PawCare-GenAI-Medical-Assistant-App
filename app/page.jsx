@@ -56,7 +56,8 @@ export default function Home() {
                 alt="Doctor consultation"
                 fill
                 priority
-                className="object-cover md:pt-14 rounded-xl"
+                className="object-cover rounded-xl" // removed md:pt-14 to prevent cropping
+                sizes="(max-width: 768px) 100vw, 50vw"
               />
             </div>
           </div>

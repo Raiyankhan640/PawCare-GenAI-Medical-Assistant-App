@@ -1,48 +1,48 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
-import { Header } from "@/components/header";
 import { ClerkProvider } from "@clerk/nextjs";
-import {dark} from '@clerk/themes';
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+import { Toaster } from "sonner";
+import {Header} from "@/components/header";
+import { dark } from "@clerk/themes";
+import { ThemeProvider } from "@/components/theme-provider";
 
-
-
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "PawCare - Doctors Appointment App for Pets",
-  description: "AI Powered Doctors Appointment App for Pets",
+  title: "PawCare - Medical Assistant for Pets",
+  description: "Connect with veterinarians anytime, anywhere",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <ClerkProvider appearance={{
-      baseTheme: dark,
-    }}>
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${inter.className} antialiased`}
-      >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {/* header */}
-          <Header />
-          <main className="min-h-screen">{children}</main>
+    <ClerkProvider
+      appearance={{
+        baseTheme: dark,
+      }}
+    >
+      <html lang="en" suppressHydrationWarning>
+        <head>
+          <link rel="icon" href="/logo.png" sizes="any" />
+        </head>
+        <body className={`${inter.className}`}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Header />
+            <main className="min-h-screen">{children}</main>
+            <Toaster richColors />
 
-          <footer>
-            <div className="container text-center py-4 border-t text-white border-gray-300 mt-8">
-              <p className="text-sm text-white-500">
-                &copy; {new Date().getFullYear()} PawCare. All rights reserved.
-              </p>
-            </div>
-          </footer>
-        </ThemeProvider>
-      </body>
-    </html>
+            <footer className="bg-muted/50 py-12">
+              <div className="container mx-auto px-4 text-center text-gray-200">
+                <p>Made with 💗 by RoadsideCoder</p>
+              </div>
+            </footer>
+          </ThemeProvider>
+        </body>
+      </html>
     </ClerkProvider>
   );
 }
