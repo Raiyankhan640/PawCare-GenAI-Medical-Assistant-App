@@ -14,7 +14,7 @@ import { Badge } from "./ui/badge";
 import { checkUser } from "@/lib/checkUser";
 
 export async function Header() {
-  const user = await checkUser();
+  const user = checkUser();
   if (user?.role === "PATIENT") {
     await checkAndAllocateCredits(user);
   }
