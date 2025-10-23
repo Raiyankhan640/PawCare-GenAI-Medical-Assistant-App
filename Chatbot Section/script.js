@@ -1,6 +1,6 @@
 class Chatbot {
     constructor() {
-        this.API_KEY = 'AIzaSyC0yn7XKOm4KrOG61VFVOaoZRdHsaEtI2c'; // Replace with your actual Gemini API key
+        this.API_KEY = 'Your api key'; // Replace with your actual Gemini API key
         this.chatMessages = document.getElementById('chatMessages');
         this.userInput = document.getElementById('userInput');
         this.sendButton = document.getElementById('sendButton');
