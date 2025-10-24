@@ -100,7 +100,7 @@ export async function Header() {
           </SignedIn>
 
           {(!user || user?.role !== "ADMIN") && (
-            <Link href={user?.role === "PATIENT" ? "/pricing" : "/doctor"}>
+            <Link href={user?.role === "PATIENT" ? "/pricing" : "/pricing"}>
               <Badge
                 variant="outline"
                 className="h-9 bg-emerald-900/20 border-emerald-700/30 px-3 py-1 flex items-center gap-2"
