@@ -14,20 +14,22 @@ export async function setUserRole(formData) {
     throw new Error("Unauthorized");
   }
 
-  // Find user in our database
-  const user = await db.user.findUnique({
-    where: { clerkUserId: userId },
-  });
-
-  if (!user) throw new Error("User not found in database");
-
-  const role = formData.get("role");
-
-  if (!role || !["PATIENT", "DOCTOR"].includes(role)) {
-    throw new Error("Invalid role selection");
-  }
-
   try {
+    // Find user in our database with better error handling
+    const user = await db.user.findUnique({
+      where: { clerkUserId: userId },
+    });
+
+    if (!user) {
+      throw new Error("User not found in database");
+    }
+
+    const role = formData.get("role");
+
+    if (!role || !["PATIENT", "DOCTOR"].includes(role)) {
+      throw new Error("Invalid role selection");
+    }
+
     // For patient role - simple update
     if (role === "PATIENT") {
       await db.user.update({
@@ -73,7 +75,15 @@ export async function setUserRole(formData) {
       return { success: true, redirect: "/doctor/verification" };
     }
   } catch (error) {
-    console.error("Failed to set user role:", error);
+    console.error("Database operation failed:", error);
+    
+    // More specific error messages
+    if (error.message.includes("Can't reach database server") || 
+        error.message.includes("connection") ||
+        error.code === "P1001") {
+      throw new Error("Database connection failed. Please try again later.");
+    }
+    
     throw new Error(`Failed to update user profile: ${error.message}`);
   }
 }
@@ -98,6 +108,15 @@ export async function getCurrentUser() {
     return user;
   } catch (error) {
     console.error("Failed to get user information:", error);
+    
+    // Handle database connection errors gracefully
+    if (error.message.includes("Can't reach database server") || 
+        error.message.includes("connection") ||
+        error.code === "P1001") {
+      console.error("Database connection error - returning null");
+      return null;
+    }
+    
     return null;
   }
 }
