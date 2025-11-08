@@ -304,11 +304,12 @@ export async function getAvailableTimeSlots(doctorId) {
         doctorId: doctor.id,
         status: "AVAILABLE",
       },
+      orderBy: { updatedAt: "desc" },
     });
 
-    if (!availability) {
-      throw new Error("No availability set by doctor");
-    }
+    // Default office hours if none set
+    const DEFAULT_START_HOUR = 9;  // 9:00
+    const DEFAULT_END_HOUR = 17;   // 17:00
 
     // Get the next 4 days
     const now = new Date();
@@ -320,34 +321,42 @@ export async function getAvailableTimeSlots(doctorId) {
       where: {
         doctorId: doctor.id,
         status: "SCHEDULED",
-        startTime: {
-          lte: lastDay,
-        },
+        startTime: { lte: lastDay },
       },
     });
 
     const availableSlotsByDay = {};
 
-    // For each of the next 4 days, generate available slots
+    // Pre-calc template hours/minutes from availability if present
+    const startTemplate = availability ? new Date(availability.startTime) : null;
+    const endTemplate = availability ? new Date(availability.endTime) : null;
+
     for (const day of days) {
       const dayString = format(day, "yyyy-MM-dd");
       availableSlotsByDay[dayString] = [];
 
-      // Create a copy of the availability start/end times for this day
-      const availabilityStart = new Date(availability.startTime);
-      const availabilityEnd = new Date(availability.endTime);
+      // Build start/end for this specific day
+      const availabilityStart = new Date(day);
+      const availabilityEnd = new Date(day);
 
-      // Set the day to the current day we're processing
-      availabilityStart.setFullYear(
-        day.getFullYear(),
-        day.getMonth(),
-        day.getDate()
-      );
-      availabilityEnd.setFullYear(
-        day.getFullYear(),
-        day.getMonth(),
-        day.getDate()
-      );
+      if (availability) {
+        availabilityStart.setHours(
+          startTemplate.getHours(),
+          startTemplate.getMinutes(),
+          0,
+          0
+        );
+        availabilityEnd.setHours(
+          endTemplate.getHours(),
+          endTemplate.getMinutes(),
+          0,
+          0
+        );
+      } else {
+        // Fallback 9:00–17:00
+        availabilityStart.setHours(DEFAULT_START_HOUR, 0, 0, 0);
+        availabilityEnd.setHours(DEFAULT_END_HOUR, 0, 0, 0);
+      }
 
       let current = new Date(availabilityStart);
       const end = new Date(availabilityEnd);
@@ -367,7 +376,6 @@ export async function getAvailableTimeSlots(doctorId) {
         const overlaps = existingAppointments.some((appointment) => {
           const aStart = new Date(appointment.startTime);
           const aEnd = new Date(appointment.endTime);
-
           return (
             (current >= aStart && current < aEnd) ||
             (next > aStart && next <= aEnd) ||
@@ -379,10 +387,7 @@ export async function getAvailableTimeSlots(doctorId) {
           availableSlotsByDay[dayString].push({
             startTime: current.toISOString(),
             endTime: next.toISOString(),
-            formatted: `${format(current, "h:mm a")} - ${format(
-              next,
-              "h:mm a"
-            )}`,
+            formatted: `${format(current, "h:mm a")} - ${format(next, "h:mm a")}`,
             day: format(current, "EEEE, MMMM d"),
           });
         }
@@ -391,7 +396,6 @@ export async function getAvailableTimeSlots(doctorId) {
       }
     }
 
-    // Convert to array of slots grouped by day for easier consumption by the UI
     const result = Object.entries(availableSlotsByDay).map(([date, slots]) => ({
       date,
       displayDate:
@@ -401,7 +405,7 @@ export async function getAvailableTimeSlots(doctorId) {
       slots,
     }));
 
-    return { days: result };
+    return { days: result, usedDefaultHours: !availability };
   } catch (error) {
     console.error("Failed to fetch available slots:", error);
     throw new Error("Failed to fetch available time slots: " + error.message);
