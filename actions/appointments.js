@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { deductCreditsForAppointment } from "@/actions/credits";
 import { Vonage } from "@vonage/server-sdk";
@@ -17,26 +17,53 @@ const options = {};
 const vonage = new Vonage(credentials, options);
 
 /**
+ * Ensure the signed-in Clerk user has a patient row
+ */
+async function getOrCreatePatientByClerkId(clerkId) {
+  // Try to find any user row for this Clerk user
+  let user = await db.user.findFirst({
+    where: { clerkUserId: clerkId },
+  });
+
+  if (!user) {
+    // Pull basic info from Clerk to hydrate the record
+    const cu = await currentUser().catch(() => null);
+    user = await db.user.create({
+      data: {
+        clerkUserId: clerkId,
+        email: cu?.emailAddresses?.[0]?.emailAddress ?? null,
+        name: cu?.fullName ?? cu?.firstName ?? "Pet Owner",
+        role: "PATIENT",
+        credits: 5, // enough to book at least once
+      },
+    });
+    return user;
+  }
+
+  // If the row exists but role is UNASSIGNED, promote to PATIENT
+  if (user.role === "UNASSIGNED") {
+    user = await db.user.update({
+      where: { id: user.id },
+      data: { role: "PATIENT" },
+    });
+  }
+
+  return user;
+}
+
+/**
  * Book a new appointment with a doctor
  */
 export async function bookAppointment(formData) {
   const { userId } = await auth();
-
-  if (!userId) {
-    throw new Error("Unauthorized");
-  }
+  if (!userId) throw new Error("Unauthorized");
 
   try {
-    // Get the patient user
-    const patient = await db.user.findUnique({
-      where: {
-        clerkUserId: userId,
-        role: "PATIENT",
-      },
-    });
+    // Ensure we have a patient row for this user
+    const patient = await getOrCreatePatientByClerkId(userId);
 
-    if (!patient) {
-      throw new Error("Patient not found");
+    if (patient.role !== "PATIENT") {
+      throw new Error("Please use a pet owner account to book");
     }
 
     // Parse form data
@@ -50,18 +77,15 @@ export async function bookAppointment(formData) {
       throw new Error("Doctor, start time, and end time are required");
     }
 
-    // Check if the doctor exists and is verified
-    const doctor = await db.user.findUnique({
+    // Doctor lookup should not use findUnique with extra filters
+    const doctor = await db.user.findFirst({
       where: {
         id: doctorId,
         role: "DOCTOR",
         verificationStatus: "VERIFIED",
       },
     });
-
-    if (!doctor) {
-      throw new Error("Doctor not found or not verified");
-    }
+    if (!doctor) throw new Error("Doctor not found or not verified");
 
     // Check if the patient has enough credits (2 credits per appointment)
     if (patient.credits < 2) {
@@ -261,21 +285,16 @@ export async function generateVideoToken(formData) {
  */
 export async function getDoctorById(doctorId) {
   try {
-    const doctor = await db.user.findUnique({
+    const doctor = await db.user.findFirst({
       where: {
         id: doctorId,
         role: "DOCTOR",
         verificationStatus: "VERIFIED",
       },
     });
-
-    if (!doctor) {
-      throw new Error("Doctor not found");
-    }
-
+    if (!doctor) throw new Error("Doctor not found");
     return { doctor };
-  } catch (error) {
-    console.error("Failed to fetch doctor:", error);
+  } catch {
     throw new Error("Failed to fetch doctor details");
   }
 }
