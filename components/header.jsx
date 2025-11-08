@@ -16,23 +16,57 @@ import { checkUser } from "@/lib/checkUser";
 export async function Header() {
   const user = checkUser();
   if (user?.role === "PATIENT") {
-    await checkAndAllocateCredits(user);
+    await syncUser();
   }
+
   return (
-    <header className="fixed top-0 w-full border-b bg-background/80 backdrop-blur-md z-10 supports-[backdrop-filter]:bg-background/60">
-      <nav className="container mx-auto px-4 h-16 flex items-center justify-between">
+    <header className="border-b sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+        {/* Logo Section */}
         <Link href="/" className="flex items-center gap-2 cursor-pointer">
           <Image
             src="/logo-single.png"
-            alt="Medimeet Logo"
+            alt="PawCare Logo"
             width={200}
             height={60}
             className="h-10 w-auto object-contain"
           />
+          <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent font-bold text-2xl">
+            PawCare
+          </span>
         </Link>
+
+        {/* Navigation Links - Desktop */}
+        <nav className="hidden md:flex items-center gap-6">
+          <Link 
+            href="/" 
+            className="text-sm font-medium text-muted-foreground hover:text-emerald-400 transition-colors"
+          >
+            Home
+          </Link>
+          <Link 
+            href="/doctors" 
+            className="text-sm font-medium text-muted-foreground hover:text-emerald-400 transition-colors"
+          >
+            Find Vets
+          </Link>
+          <Link 
+            href="/about" 
+            className="text-sm font-medium text-muted-foreground hover:text-emerald-400 transition-colors"
+          >
+            About Us
+          </Link>
+          <Link 
+            href="/contact" 
+            className="text-sm font-medium text-muted-foreground hover:text-emerald-400 transition-colors"
+          >
+            Contact
+          </Link>
+        </nav>
 
         {/* Action Buttons */}
         <div className="flex items-center space-x-2">
+          {/* <ThemeToggle /> */}
           <SignedIn>
            {/* Admin Links */}
             {user?.role === "ADMIN" && (
@@ -125,9 +159,9 @@ export async function Header() {
           )}
 
           <SignedOut>
-            <SignInButton>
-              <Button variant="secondary">Sign In</Button>
-            </SignInButton>
+            <Button asChild variant="outline" size="sm">
+              <SignInButton mode="modal">Sign In</SignInButton>
+            </Button>
           </SignedOut>
 
           <SignedIn>
@@ -143,7 +177,7 @@ export async function Header() {
             />
           </SignedIn>
         </div>
-      </nav>
+      </div>
     </header>
   );
 }
