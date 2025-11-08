@@ -304,7 +304,7 @@ export async function getAvailableTimeSlots(doctorId) {
         doctorId: doctor.id,
         status: "AVAILABLE",
       },
-      orderBy: { updatedAt: "desc" },
+      orderBy: { startTime: "asc" }, // was: updatedAt: "desc" (invalid)
     });
 
     // Default office hours if none set

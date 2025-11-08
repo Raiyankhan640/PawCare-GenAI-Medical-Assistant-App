@@ -6,7 +6,13 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed:availability": "node scripts/seed-availability.js",
+    "seed:doctors": "node scripts/seed-doctors.js",
+    "seed:all": "node scripts/seed-doctors.js",
+    "seed:vets-by-specialty": "node scripts/seed-vets-by-specialty.js",
+    "migrate:specialties": "node scripts/migrate-specialties.js",
+    "seed:more-vets": "node scripts/seed-more-vets.js"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.33.7",
