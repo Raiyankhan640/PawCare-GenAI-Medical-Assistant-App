@@ -1,186 +1,117 @@
-# PawCare - GenAI Medical Assistant App
+# PawCare — Veterinary Telemedicine Platform
 
-[![Next.js](https://img.shields.io/badge/Next.js-15.5.6-black)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19.1.0-blue)](https://reactjs.org/)
-[![Prisma](https://img.shields.io/badge/Prisma-6.18.0-green)](https://prisma.io/)
-[![Clerk](https://img.shields.io/badge/Clerk-Auth-orange)](https://clerk.com/)
+PawCare is a AI Powered Next.js app that connects pet owners with verified veterinarians for virtual appointments, scheduling, and credits.
 
-A comprehensive telemedicine platform for pet healthcare, connecting pet owners with licensed veterinarians through secure video consultations, appointment scheduling, and AI-powered medical assistance.
+## Stack
+- Next.js (App Router) + React + TailwindCSS (shadcn/ui)
+- Auth: Clerk
+- DB: PostgreSQL via Prisma (Neon recommended)
+- Video: Vonage Video API (OpenTok)
+- Date utils: date-fns
 
-## 🚀 Features
+## Quick start (Windows)
+1) Clone and install
+- git clone <repo-url>
+- cd pawcare
+- npm install
 
-### Core Functionality
-- **User Authentication**: Secure authentication via Clerk with role-based access (Patients, Doctors, Admins)
-- **Appointment Scheduling**: Book telemedicine consultations with available veterinarians
-- **Video Consultations**: Integrated video sessions for remote pet healthcare
-- **Credit System**: Flexible payment system with credit packages for consultations
-- **Doctor Verification**: Comprehensive vet credential verification process
-- **Payout Management**: Automated payout system for doctors with platform fee handling
+2) Configure environment
+- Create .env from the example below
+- Save your Vonage application private key file at lib/private.key (PEM)
 
-### Upcoming Features
-- **AI Chatbot**: Interactive LLM-powered chatbot for disease consultation and treatment advice
-- **Image Analysis**: Upload and analyze pet infection images using advanced AI processing
-- **Medical History Tracking**: Comprehensive pet health records and history management
+3) Database
+- npx prisma generate
+- For a fresh DB: npx prisma migrate deploy
+- Optional (local dev data): npm run seed:vets-by-specialty or npm run seed:more-vets
 
-### Technical Features
-- **Real-time Notifications**: Webhook integration for payment and appointment updates
-- **Responsive Design**: Mobile-first UI built with Tailwind CSS and Radix UI components
-- **Database Management**: PostgreSQL with Prisma ORM for robust data handling
-- **Type Safety**: Full TypeScript support for reliable development
+4) Run
+- npm run dev
+- Open http://localhost:3000
 
-## 🛠 Tech Stack
-
-- **Frontend**: Next.js 15, React 19, Tailwind CSS, Radix UI
-- **Backend**: Next.js API Routes, Prisma ORM
-- **Database**: PostgreSQL
-- **Authentication**: Clerk
-- **Video**: Vonage Video API (planned integration)
-- **AI/ML**: OpenAI GPT models (for future chatbot and image analysis)
-- **Deployment**: Vercel-ready configuration
-
-## 📋 Prerequisites
-
-Before running this application, make sure you have the following installed:
-
-- **Node.js** (version 18 or higher)
-- **npm** or **yarn** package manager
-- **PostgreSQL** database (local or cloud instance)
-- **Clerk Account** for authentication setup
-
-## 🚀 Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/your-username/pawcare.git
-   cd pawcare
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Set up environment variables**
-
-   Create a `.env.local` file in the root directory and add the following variables:
-
-   ```env
-   # Database
-   DATABASE_URL="postgresql://username:password@localhost:5432/pawcare_db"
-
-   # Clerk Authentication
-   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
-   CLERK_SECRET_KEY=your_clerk_secret_key
-   NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-   NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-   NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/
-   NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/
-
-   # Webhooks (for payment processing)
-   CLERK_WEBHOOK_SECRET=your_clerk_webhook_secret
-
-   # Video API (for future video consultations)
-   VONAGE_API_KEY=your_vonage_api_key
-   VONAGE_API_SECRET=your_vonage_api_secret
-
-   # AI Integration (for future features)
-   OPENAI_API_KEY=your_openai_api_key
-   ```
-
-4. **Database Setup**
-
-   ```bash
-   # Generate Prisma client
-   npx prisma generate
-
-   # Run database migrations
-   npx prisma db push
-
-   # (Optional) Seed the database with initial data
-   npx prisma db seed
-   ```
-
-5. **Run the development server**
-
-   ```bash
-   npm run dev
-   ```
-
-   Open [http://localhost:3000](http://localhost:3000) in your browser to view the application.
-
-## 📁 Project Structure
-
+## Environment variables (.env)
+Copy, then replace values with your own.
 ```
-pawcare/
-├── app/                    # Next.js app directory
-│   ├── api/               # API routes
-│   ├── (auth)/            # Authentication pages
-│   ├── layout.js          # Root layout
-│   └── page.jsx           # Home page
-├── components/            # Reusable UI components
-│   ├── ui/               # Radix UI components
-│   └── ...               # Custom components
-├── lib/                  # Utility functions and configurations
-│   ├── prisma.js         # Prisma client setup
-│   ├── checkUser.js      # User verification utilities
-│   └── ...               # Other utilities
-├── prisma/               # Database schema and migrations
-│   ├── schema.prisma     # Prisma schema definition
-│   └── migrations/       # Database migrations
-├── public/               # Static assets
-└── ...                   # Configuration files
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxx
+CLERK_SECRET_KEY=sk_test_xxx
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/onboarding
+NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/onboarding
+
+# Vonage Video
+NEXT_PUBLIC_VONAGE_APPLICATION_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+# Path to PEM key contents (file is read by the SDK)
+VONAGE_PRIVATE_KEY=lib/private.key
+
+# Postgres (Neon recommended so multiple devices share the same data)
+DATABASE_URL=postgresql://user:password@host/db?sslmode=require
 ```
+Notes:
+- Keep .env out of Git. Rotate any keys that were ever committed.
+- The VONAGE_PRIVATE_KEY is a path to a PEM file; place it at lib/private.key.
 
-## 🔧 Available Scripts
+## Scripts
+- npm run dev — start dev server (Turbopack)
+- npm run build / npm start — production build/start
+- npm run migrate:specialties — remap human specialties to veterinary ones
+- npm run seed:vets-by-specialty — ensure multiple verified vets exist for each specialty listed in lib/specialities.js, and create availability
+- npm run seed:more-vets — add more vets and availability (pet-care profiles)
+- npm run seed:doctors, npm run seed:availability — legacy seed helpers
+- npx prisma studio — browse/edit data in a web UI
 
-- `npm run dev` - Start the development server with Turbopack
-- `npm run build` - Build the application for production
-- `npm run start` - Start the production server
-- `npm run lint` - Run ESLint for code quality checks
+## Data model (high level)
+- User: roles UNASSIGNED | PATIENT | DOCTOR | ADMIN, verificationStatus for doctors, credits for patients
+- Availability: one time range per doctor used as a daily template (30‑min slots are computed at runtime)
+- Appointment: SCHEDULED → COMPLETED/CANCELLED, stores Vonage sessionId and token
+- CreditTransaction, Payout: bookkeeping for credits and withdrawals
 
-## 📚 API Documentation
+## Developer workflows
+- DB migrations: 
+  - Local: npx prisma migrate dev
+  - CI/Production: npx prisma migrate deploy
+- Seeding vets and availability:
+  - SPECIALTIES live in lib/specialities.js. Seeder scripts read that file to create realistic, verified veterinarians with availability (no hardcoding of names).
+  - Run: npm run seed:vets-by-specialty
+- Viewing vets:
+  - /doctors — grid by specialty with counts
+  - Click a specialty → /doctors/[specialty] to see vets
+  - “View Profile & Book” opens the doctor page, shows availability, and lets you book
 
-### Webhooks
-- **POST** `/api/webhooks` - Handles Clerk webhook events for user and payment updates
+## Using this project on another device (share the same data)
+Because the DATABASE_URL points to a remote Postgres (e.g., Neon), data is shared automatically across devices.
+1) On the new device:
+- Clone the repo and run npm install
+- Copy the .env from your primary device (and lib/private.key)
+- Run npx prisma generate and npm run dev (or npx prisma migrate deploy on a fresh DB)
+2) If you used a local Postgres instead of Neon:
+- Export on device A: pg_dump <db-url> > dump.sql
+- Import on device B: psql <db-url> -f dump.sql
 
-### Key Endpoints (Planned)
-- **GET/POST** `/api/appointments` - Appointment management
-- **GET/POST** `/api/doctors` - Doctor profiles and availability
-- **POST** `/api/chatbot` - AI chatbot interactions (future feature)
-- **POST** `/api/analyze-image` - Image analysis for medical conditions (future feature)
+## Vonage setup (Video)
+- Create a Vonage application (Video API)
+- Download the private key (PEM) and save as lib/private.key
+- Set NEXT_PUBLIC_VONAGE_APPLICATION_ID and VONAGE_PRIVATE_KEY in .env
 
-## 🤝 Contributing
+## Clerk setup
+- Create a Clerk application and copy the publishable and secret keys
+- The app expects routes: /sign-in and /sign-up
+- On first booking, a “patient” row is auto-created for the signed-in Clerk user (with starter credits)
 
-We welcome contributions! Please follow these steps:
+## Troubleshooting
+- Module not found: @vonage/auth — run: npm i @vonage/server-sdk @vonage/auth
+- Availability query error (updatedAt not found) — fixed to order by startTime
+- “Patient not found” on booking — the app now auto-creates a PATIENT row for the signed-in user
+- “No availability set by doctor” — code falls back to 9:00–17:00 if none exists; you can seed availability with the scripts above
+- Profile page bouncing back — usually indicates a server error at fetch time; check terminal for Prisma errors
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+## Project structure (key paths)
+- app/ — routes (Home, Doctors, About, Contact)
+- actions/ — server actions (appointments, credits, etc.)
+- lib/prisma.js — Prisma client
+- lib/specialities.js — specialties listed on the Find Vets page (seeders read this)
+- components/ — UI components (header, buttons, etc.)
+- scripts/ — seed/migration utilities used by npm scripts
+- prisma/ — schema and migrations
 
-### Development Guidelines
-- Follow the existing code style and conventions
-- Write clear, concise commit messages
-- Add tests for new features
-- Update documentation as needed
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- [Next.js](https://nextjs.org/) for the amazing React framework
-- [Clerk](https://clerk.com/) for seamless authentication
-- [Prisma](https://prisma.io/) for database ORM
-- [Radix UI](https://www.radix-ui.com/) for accessible components
-- [Tailwind CSS](https://tailwindcss.com/) for utility-first styling
-
-## 📞 Support
-
-For support, email support@pawcare.com or join our Discord community.
-
----
-
-**PawCare** - Making pet healthcare accessible, one consultation at a time. 🐾
+## License
+For personal or educational use. Replace branding and assets for production.
