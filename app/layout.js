@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import {Header} from "@/components/header";
 import { dark } from "@clerk/themes";
 import { ThemeProvider } from "@/components/theme-provider";
+import { ChatbotWidget } from "@/components/chatbot/ChatbotWidget";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -34,6 +35,7 @@ export default function RootLayout({ children }) {
             <Header />
             <main className="min-h-screen">{children}</main>
             <Toaster richColors />
+            <ChatbotWidget />
 
             <footer className="bg-background border-t">
               <div className="container mx-auto px-4 py-12">
