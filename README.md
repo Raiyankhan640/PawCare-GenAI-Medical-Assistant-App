@@ -1,35 +1,46 @@
-# PawCare — Veterinary Telemedicine Platform
+# PawCare — AI Veterinary Telemedicine Platform
 
-PawCare is a AI Powered Next.js app that connects pet owners with verified veterinarians for virtual appointments, scheduling, and credits.
+PawCare is an AI-assisted Next.js platform that connects pet owners with verified veterinarians for virtual appointments, scheduling, and credit-based billing.
 
-## Stack
-- Next.js (App Router) + React + TailwindCSS (shadcn/ui)
-- Auth: Clerk
-- DB: PostgreSQL via Prisma (Neon recommended)
+## Features
+- Authenticated onboarding for patients, doctors, and admins (Clerk)
+- Dynamic doctor directory with specialty filters and animated profile pages
+- Real-time slot selection and booking tied to Prisma-managed availability
+- Credits marketplace, payouts, and admin review workflows
+- Integrated Vonage video sessions for remote consultations
+- Responsive, polished UI built with Tailwind CSS, shadcn/ui, Framer Motion, and GSAP
+
+## UI Preview
+| Home | About | Pricing | Contact |
+| --- | --- | --- | --- |
+| ![Home screen](images/home.png) | ![About screen](images/about.png) | ![Pricing screen](images/pricing.png) | ![Contact screen](images/contact.png) |
+
+## Tech Stack
+- Framework: Next.js App Router (React 19, Turbopack)
+- Styling: Tailwind CSS v4, shadcn/ui, custom motion/GSAP effects
+- Auth: Clerk (hosted auth, multi-tenant ready)
+- Database: PostgreSQL via Prisma (Neon recommended for cloud syncing)
 - Video: Vonage Video API (OpenTok)
-- Date utils: date-fns
+- Tooling: ESLint 9, Prisma CLI, Date-fns, React Hook Form, Zod
 
-## Quick start (Windows)
-1) Clone and install
-- git clone <repo-url>
-- cd pawcare
-- npm install
+## Requirements
+- Node.js 20+
+- npm 10+
+- Access to a Postgres database (Neon, Supabase, RDS, etc.)
+- Clerk application (publishable + secret key)
+- Vonage Video API application + private key (PEM)
 
-2) Configure environment
-- Create .env from the example below
-- Save your Vonage application private key file at lib/private.key (PEM)
+## Getting Started
 
-3) Database
-- npx prisma generate
-- For a fresh DB: npx prisma migrate deploy
-- Optional (local dev data): npm run seed:vets-by-specialty or npm run seed:more-vets
+### 1. Clone and Install
+```bash
+git clone <your-fork-or-clone-url>
+cd PawCare-GenAI-Medical-Assistant-App
+npm install
+```
 
-4) Run
-- npm run dev
-- Open http://localhost:3000
-
-## Environment variables (.env)
-Copy, then replace values with your own.
+### 2. Environment Variables
+Create `.env` by copying `.env.example` and update the values:
 ```
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxx
 CLERK_SECRET_KEY=sk_test_xxx
@@ -40,78 +51,81 @@ NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/onboarding
 
 # Vonage Video
 NEXT_PUBLIC_VONAGE_APPLICATION_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-# Path to PEM key contents (file is read by the SDK)
 VONAGE_PRIVATE_KEY=lib/private.key
 
-# Postgres (Neon recommended so multiple devices share the same data)
+# Postgres (Neon recommended for remote access)
 DATABASE_URL=postgresql://user:password@host/db?sslmode=require
 ```
-Notes:
-- Keep .env out of Git. Rotate any keys that were ever committed.
-- The VONAGE_PRIVATE_KEY is a path to a PEM file; place it at lib/private.key.
+Place the Vonage PEM file at `lib/private.key` (ignored by Git).
 
-## Scripts
-- npm run dev — start dev server (Turbopack)
-- npm run build / npm start — production build/start
-- npm run migrate:specialties — remap human specialties to veterinary ones
-- npm run seed:vets-by-specialty — ensure multiple verified vets exist for each specialty listed in lib/specialities.js, and create availability
-- npm run seed:more-vets — add more vets and availability (pet-care profiles)
-- npm run seed:doctors, npm run seed:availability — legacy seed helpers
-- npx prisma studio — browse/edit data in a web UI
+### 3. Database Prep
+```bash
+npx prisma generate
+npx prisma migrate deploy   # apply existing migrations
+```
 
-## Data model (high level)
-- User: roles UNASSIGNED | PATIENT | DOCTOR | ADMIN, verificationStatus for doctors, credits for patients
-- Availability: one time range per doctor used as a daily template (30‑min slots are computed at runtime)
-- Appointment: SCHEDULED → COMPLETED/CANCELLED, stores Vonage sessionId and token
-- CreditTransaction, Payout: bookkeeping for credits and withdrawals
+Seed helper data (optional but recommended for demos):
+```bash
+npm run migrate:specialties
+npm run seed:vets-by-specialty
+# or npm run seed:more-vets / npm run seed:availability as needed
+```
 
-## Developer workflows
-- DB migrations: 
-  - Local: npx prisma migrate dev
-  - CI/Production: npx prisma migrate deploy
-- Seeding vets and availability:
-  - SPECIALTIES live in lib/specialities.js. Seeder scripts read that file to create realistic, verified veterinarians with availability (no hardcoding of names).
-  - Run: npm run seed:vets-by-specialty
-- Viewing vets:
-  - /doctors — grid by specialty with counts
-  - Click a specialty → /doctors/[specialty] to see vets
-  - “View Profile & Book” opens the doctor page, shows availability, and lets you book
+### 4. Run the App
+```bash
+npm run dev
+```
+Visit `http://localhost:3000` (use `http://localhost:3001` if the dev server selects a different port).
 
-## Using this project on another device (share the same data)
-Because the DATABASE_URL points to a remote Postgres (e.g., Neon), data is shared automatically across devices.
-1) On the new device:
-- Clone the repo and run npm install
-- Copy the .env from your primary device (and lib/private.key)
-- Run npx prisma generate and npm run dev (or npx prisma migrate deploy on a fresh DB)
-2) If you used a local Postgres instead of Neon:
-- Export on device A: pg_dump <db-url> > dump.sql
-- Import on device B: psql <db-url> -f dump.sql
+## Using PawCare
+- **Patients**: Sign up via Clerk, complete onboarding, browse `/doctors`, select a vet, pick a slot, and confirm booking with available credits.
+- **Doctors**: After onboarding, set availability and await admin verification within `/doctor/verification`.
+- **Admins**: Access `/admin` to review pending doctors and payouts, manage credits, and oversee appointments.
+- **Video visits**: Each appointment stores Vonage credentials; join sessions from the appointment detail view when the meeting starts.
 
-## Vonage setup (Video)
-- Create a Vonage application (Video API)
-- Download the private key (PEM) and save as lib/private.key
-- Set NEXT_PUBLIC_VONAGE_APPLICATION_ID and VONAGE_PRIVATE_KEY in .env
+## NPM Scripts
+- `npm run dev` — start the Next.js dev server with Turbopack
+- `npm run build` / `npm start` — production build and start
+- `npm run migrate:specialties` — normalize imported specialties
+- `npm run seed:vets-by-specialty` — populate verified doctors and availability
+- `npm run seed:more-vets` — add extended vet roster and slots
+- `npm run seed:doctors`, `npm run seed:availability` — legacy seed helpers
+- `npx prisma studio` — open Prisma Studio for data inspection
 
-## Clerk setup
-- Create a Clerk application and copy the publishable and secret keys
-- The app expects routes: /sign-in and /sign-up
-- On first booking, a “patient” row is auto-created for the signed-in Clerk user (with starter credits)
+## Data Model Highlights
+- **User**: roles `UNASSIGNED | PATIENT | DOCTOR | ADMIN`, doctor verification state, patient credit balance
+- **Availability**: template rows per doctor; runtime derives 30-minute slots
+- **Appointment**: lifecycle `SCHEDULED → COMPLETED | CANCELLED`, stores Vonage `sessionId` + `token`
+- **CreditTransaction / Payout**: tracks wallet changes and doctor withdrawals
+
+## Working Across Devices
+When `DATABASE_URL` points to cloud Postgres (Neon/Supabase):
+1. Clone repo on the new device and run `npm install`.
+2. Copy `.env` (and `lib/private.key`).
+3. Run `npx prisma generate` then `npm run dev`.
+
+If you rely on a local Postgres instance instead:
+1. Export: `pg_dump <db-url> > dump.sql`
+2. Transfer `dump.sql`.
+3. Import: `psql <db-url> -f dump.sql`
+
+## Integrations
+- **Vonage Video**: create an app, download the PEM key, update `.env`, store key at `lib/private.key`.
+- **Clerk Auth**: configure sign-in/up URLs to match this project; on first booking a patient row is auto-created.
 
 ## Troubleshooting
-- Module not found: @vonage/auth — run: npm i @vonage/server-sdk @vonage/auth
-- Availability query error (updatedAt not found) — fixed to order by startTime
-- “Patient not found” on booking — the app now auto-creates a PATIENT row for the signed-in user
-- “No availability set by doctor” — code falls back to 9:00–17:00 if none exists; you can seed availability with the scripts above
-- Profile page bouncing back — usually indicates a server error at fetch time; check terminal for Prisma errors
+- `Module not found: @vonage/auth` → `npm i @vonage/server-sdk @vonage/auth`
+- Availability errors due to missing slots → rerun `npm run seed:vets-by-specialty` or adjust availability in the doctor dashboard.
+- “Patient not found” → ensure you are signed in; the system auto-creates patient records post onboarding.
+- Unexpected redirect on profile pages → check server logs for Prisma errors or missing environment variables.
 
-## Project structure (key paths)
-- app/ — routes (Home, Doctors, About, Contact)
-- actions/ — server actions (appointments, credits, etc.)
-- lib/prisma.js — Prisma client
-- lib/specialities.js — specialties listed on the Find Vets page (seeders read this)
-- components/ — UI components (header, buttons, etc.)
-- scripts/ — seed/migration utilities used by npm scripts
-- prisma/ — schema and migrations
+## Project Structure
+- `app/` — Next.js routes (auth, onboarding, doctors, admin, marketing pages)
+- `actions/` — server actions for appointments, payouts, credits
+- `components/` — shared UI, layout primitives, animated widgets
+- `lib/` — Prisma client, data helpers, specialty lists
+- `scripts/` — database seeding and specialty migration utilities
+- `prisma/` — schema and migration history
 
 ## License
-For personal or educational use. Replace branding and assets for production.
+For personal or educational use. Replace branding, assets, and credentials before production deployment.
