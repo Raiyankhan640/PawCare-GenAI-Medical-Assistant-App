@@ -208,7 +208,7 @@ export default function Home() {
           scale: 0.9,
           stagger: 0.1,
           duration: 0.6,
-          ease: "back.out(1.2)",
+          ease: "power2.out",
           clearProps: "all"
         });
       }
