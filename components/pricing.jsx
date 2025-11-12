@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { PricingTable } from "@clerk/nextjs";
 import { Badge } from "./ui/badge";
@@ -12,8 +12,15 @@ gsap.registerPlugin(ScrollTrigger);
 
 const Pricing = () => {
   const pricingRef = useRef(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
     const ctx = gsap.context(() => {
       gsap.set(".pricing-container", { opacity: 1 });
       
@@ -32,7 +39,11 @@ const Pricing = () => {
     }, pricingRef);
 
     return () => ctx.revert();
-  }, []);
+  }, [mounted]);
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <div ref={pricingRef}>

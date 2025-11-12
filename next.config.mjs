@@ -1,8 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable React Strict Mode for better development experience
-  reactStrictMode: true,
-  
   // Optimize images
   images: {
     formats: ['image/avif', 'image/webp'],
@@ -10,12 +7,6 @@ const nextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,
   },
-
-  // Enable SWC minification for faster builds
-  swcMinify: true,
-
-  // Optimize CSS
-  optimizeFonts: true,
 
   // Compiler optimizations
   compiler: {
@@ -26,7 +17,7 @@ const nextConfig = {
 
   // Experimental features for better performance
   experimental: {
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', 'framer-motion'],
   },
 
   // Headers for better caching
@@ -41,8 +32,20 @@ const nextConfig = {
           },
         ],
       },
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
     ];
   },
+
+  // Disable powered by header
+  poweredByHeader: false,
 };
 
 export default nextConfig;

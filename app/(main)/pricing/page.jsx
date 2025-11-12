@@ -1,12 +1,9 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, CreditCard, Shield, Check } from "lucide-react";
-import { PricingTable } from "@clerk/nextjs";
+import { ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import Pricing from "@/components/pricing";
 
-export default async function PricingPage() {
+export default function PricingPage() {
   return (
     <div className="container mx-auto px-4 py-12">
       {/* Header Section */}

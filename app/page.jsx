@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { 
   ArrowRight, 
   Stethoscope,
@@ -19,16 +20,34 @@ import {
   Activity,
   Zap,
   Award,
-  TrendingUp
+  TrendingUp,
+  Phone,
+  AlertCircle,
+  Pill,
+  Syringe,
+  HeartPulse,
+  PawPrint,
+  BriefcaseMedical,
+  ClipboardCheck,
+  Users,
+  DollarSign,
+  CheckCircle2,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import Pricing from "@/components/pricing";
 import { creditBenefits } from "@/lib/data";
+import { preloadRoutes, getAnimationConfig } from "@/lib/performance";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { motion } from "framer-motion";
+
+// Lazy load heavy components
+const Pricing = dynamic(() => import("@/components/pricing"), {
+  loading: () => <div className="h-96 flex items-center justify-center text-muted-foreground">Loading pricing...</div>,
+  ssr: false
+});
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -108,6 +127,9 @@ export default function Home() {
     console.log("Testimonials loaded:", testimonials.length);
     console.log("First feature:", features[0]);
     console.log("First testimonial:", testimonials[0]);
+    
+    // Preload critical routes for faster navigation
+    preloadRoutes();
   }, [features, testimonials]);
   
   useEffect(() => {
@@ -701,6 +723,350 @@ export default function Home() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pet Health Statistics - Interactive Counter Section */}
+      <section className="py-12 md:py-16 bg-muted/20 relative overflow-hidden">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <Badge
+              variant="outline"
+              className="bg-emerald-900/30 border-emerald-700/30 px-4 py-1 text-emerald-400 text-sm font-medium mb-4 backdrop-blur-sm"
+            >
+              Platform Statistics
+            </Badge>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              Trusted by Pet Parents Everywhere
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Join our growing community of pet lovers and veterinary professionals
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+            {[
+              { icon: <PawPrint className="h-8 w-8" />, number: "50K+", label: "Happy Pets", color: "emerald" },
+              { icon: <Users className="h-8 w-8" />, number: "25K+", label: "Pet Parents", color: "teal" },
+              { icon: <Stethoscope className="h-8 w-8" />, number: "500+", label: "Verified Vets", color: "cyan" },
+              { icon: <Award className="h-8 w-8" />, number: "98%", label: "Satisfaction Rate", color: "emerald" }
+            ].map((stat, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1, duration: 0.5 }}
+              >
+                <Card className="text-center p-6 bg-card/50 backdrop-blur-sm border-emerald-900/20 hover:border-emerald-700/40 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/10 group">
+                  <motion.div
+                    whileHover={{ rotate: [0, -10, 10, -10, 0] }}
+                    transition={{ duration: 0.5 }}
+                    className={`w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-${stat.color}-500/20 to-${stat.color}-600/20 flex items-center justify-center text-${stat.color}-400 group-hover:scale-110 transition-transform`}
+                  >
+                    {stat.icon}
+                  </motion.div>
+                  <h3 className="text-3xl md:text-4xl font-bold text-white mb-2 group-hover:text-emerald-400 transition-colors">
+                    {stat.number}
+                  </h3>
+                  <p className="text-muted-foreground text-sm md:text-base">{stat.label}</p>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Emergency Care - 24/7 Support Section */}
+      <section className="py-12 md:py-16 relative">
+        <div className="container mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <Badge
+                variant="outline"
+                className="bg-red-900/30 border-red-700/30 px-4 py-1 text-red-400 text-sm font-medium mb-4 backdrop-blur-sm"
+              >
+                <AlertCircle className="h-3 w-3 mr-2 inline" />
+                Emergency Care
+              </Badge>
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+                24/7 Emergency Veterinary Support
+              </h2>
+              <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
+                Pet emergencies don&apos;t wait for business hours. Our platform connects you with emergency veterinary care anytime, anywhere. Get instant help when your furry friend needs it most.
+              </p>
+
+              <div className="space-y-4 mb-8">
+                {[
+                  { icon: <Phone className="h-5 w-5" />, text: "Instant vet consultation via call or video" },
+                  { icon: <HeartPulse className="h-5 w-5" />, text: "Real-time health monitoring and alerts" },
+                  { icon: <BriefcaseMedical className="h-5 w-5" />, text: "Emergency clinic locator near you" }
+                ].map((item, idx) => (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: idx * 0.1, duration: 0.4 }}
+                    className="flex items-start gap-4 p-4 rounded-lg bg-card/30 backdrop-blur-sm border border-emerald-900/20 hover:border-emerald-700/40 transition-all duration-300 group"
+                  >
+                    <div className="shrink-0 w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                      {item.icon}
+                    </div>
+                    <p className="text-white pt-2">{item.text}</p>
+                  </motion.div>
+                ))}
+              </div>
+
+              <Button
+                size="lg"
+                className="bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-500/30 group"
+              >
+                <Phone className="mr-2 h-5 w-5 group-hover:animate-pulse" />
+                Emergency Hotline
+              </Button>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="relative"
+            >
+              <Card className="p-8 bg-gradient-to-br from-emerald-950/40 to-emerald-900/20 border-emerald-900/30 backdrop-blur-sm relative overflow-hidden">
+                {/* Animated pulse effect */}
+                <motion.div
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    opacity: [0.5, 0.2, 0.5]
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl"
+                />
+                
+                <div className="relative z-10">
+                  <div className="text-center mb-6">
+                    <motion.div
+                      animate={{
+                        scale: [1, 1.1, 1]
+                      }}
+                      transition={{
+                        duration: 1.5,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                      className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-red-500/30 to-red-600/30 flex items-center justify-center text-red-400 shadow-2xl shadow-red-500/20"
+                    >
+                      <Heart className="h-12 w-12" fill="currentColor" />
+                    </motion.div>
+                    <h3 className="text-2xl font-bold text-white mb-2">Always Here For You</h3>
+                    <p className="text-emerald-400 font-semibold">Response Time: &lt; 2 Minutes</p>
+                  </div>
+
+                  <div className="space-y-4">
+                    {[
+                      "Emergency Triage Assessment",
+                      "Video Consultation Available",
+                      "Prescription Services",
+                      "Follow-up Care Included"
+                    ].map((feature, idx) => (
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, x: -20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: idx * 0.1 }}
+                        className="flex items-center gap-3 text-white"
+                      >
+                        <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
+                        <span>{feature}</span>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pet Care Services Comparison */}
+      <section className="py-12 md:py-16 bg-muted/20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <Badge
+              variant="outline"
+              className="bg-emerald-900/30 border-emerald-700/30 px-4 py-1 text-emerald-400 text-sm font-medium mb-4 backdrop-blur-sm"
+            >
+              Why Choose Us
+            </Badge>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              Traditional vs PawCare Platform
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              See how we&apos;re revolutionizing pet healthcare
+            </p>
+          </div>
+
+          <div className="max-w-5xl mx-auto">
+            <div className="grid md:grid-cols-3 gap-4">
+              {/* Header Row */}
+              <div className="hidden md:block"></div>
+              <div className="text-center p-4">
+                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
+                  <X className="h-6 w-6 text-red-400 mx-auto mb-2" />
+                  <h3 className="font-semibold text-white">Traditional Care</h3>
+                </div>
+              </div>
+              <div className="text-center p-4">
+                <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3">
+                  <CheckCircle2 className="h-6 w-6 text-emerald-400 mx-auto mb-2" />
+                  <h3 className="font-semibold text-white">PawCare Platform</h3>
+                </div>
+              </div>
+
+              {/* Comparison Rows */}
+              {[
+                { feature: "Appointment Wait Time", traditional: "1-2 Weeks", pawcare: "Same Day" },
+                { feature: "Consultation Fee", traditional: "$100-200", pawcare: "From $25" },
+                { feature: "24/7 Support", traditional: "Limited", pawcare: "Always Available" },
+                { feature: "Medical Records", traditional: "Paper Based", pawcare: "Digital & Secure" },
+                { feature: "Follow-up Care", traditional: "Extra Visit Required", pawcare: "Included Free" },
+                { feature: "Second Opinion", traditional: "Not Available", pawcare: "Instant Access" }
+              ].map((row, idx) => (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: idx * 0.05 }}
+                  className="contents"
+                >
+                  <div className="p-4 bg-card/30 backdrop-blur-sm border border-emerald-900/20 rounded-lg flex items-center md:rounded-r-none">
+                    <span className="font-medium text-white">{row.feature}</span>
+                  </div>
+                  <div className="p-4 bg-card/20 backdrop-blur-sm border border-red-900/20 rounded-lg flex items-center justify-center md:rounded-none">
+                    <span className="text-red-400 text-sm md:text-base">{row.traditional}</span>
+                  </div>
+                  <div className="p-4 bg-card/20 backdrop-blur-sm border border-emerald-900/20 rounded-lg flex items-center justify-center md:rounded-l-none">
+                    <span className="text-emerald-400 font-semibold text-sm md:text-base">{row.pawcare}</span>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pet Health Tips Section */}
+      <section className="py-12 md:py-16">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <Badge
+              variant="outline"
+              className="bg-emerald-900/30 border-emerald-700/30 px-4 py-1 text-emerald-400 text-sm font-medium mb-4 backdrop-blur-sm"
+            >
+              Health Tips
+            </Badge>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              Essential Pet Care Tips
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Expert advice to keep your pets healthy and happy
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {
+                icon: <Pill className="h-8 w-8" />,
+                title: "Vaccination Schedule",
+                description: "Keep your pet's vaccinations up to date. Core vaccines protect against serious diseases.",
+                tips: ["Puppy/Kitten: 6-8 weeks", "Booster shots: Annual", "Rabies: Every 1-3 years"]
+              },
+              {
+                icon: <Syringe className="h-8 w-8" />,
+                title: "Preventive Care",
+                description: "Regular check-ups can detect health issues early. Prevention is better than cure.",
+                tips: ["Dental check: 6 months", "Blood work: Annually", "Parasite control: Monthly"]
+              },
+              {
+                icon: <Activity className="h-8 w-8" />,
+                title: "Exercise & Nutrition",
+                description: "Balanced diet and regular exercise are key to your pet's wellbeing and longevity.",
+                tips: ["Daily walks: 30-60 min", "Quality food: Age-appropriate", "Fresh water: Always available"]
+              },
+              {
+                icon: <Heart className="h-8 w-8" />,
+                title: "Mental Health",
+                description: "Pets need mental stimulation and social interaction to stay happy and healthy.",
+                tips: ["Interactive toys", "Social playtime", "Training sessions"]
+              },
+              {
+                icon: <ClipboardCheck className="h-8 w-8" />,
+                title: "Warning Signs",
+                description: "Know the signs that indicate your pet needs immediate veterinary attention.",
+                tips: ["Loss of appetite", "Lethargy", "Vomiting/Diarrhea"]
+              },
+              {
+                icon: <ShieldCheck className="h-8 w-8" />,
+                title: "Pet Safety",
+                description: "Create a safe environment for your pet at home and during outdoor activities.",
+                tips: ["Pet-proof home", "ID tags & microchip", "Supervised outdoor time"]
+              }
+            ].map((tip, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.1, duration: 0.4 }}
+              >
+                <Card className="h-full p-6 bg-card/50 backdrop-blur-sm border-emerald-900/20 hover:border-emerald-700/40 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-emerald-500/10 group">
+                  <div className="w-16 h-16 mb-4 rounded-full bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                    {tip.icon}
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-3 group-hover:text-emerald-400 transition-colors">
+                    {tip.title}
+                  </h3>
+                  <p className="text-muted-foreground mb-4 leading-relaxed">
+                    {tip.description}
+                  </p>
+                  <ul className="space-y-2">
+                    {tip.tips.map((item, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Button
+              asChild
+              size="lg"
+              className="bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-500/30"
+            >
+              <Link href="/doctors">
+                <Stethoscope className="mr-2 h-5 w-5" />
+                Consult a Vet Now
+              </Link>
+            </Button>
           </div>
         </div>
       </section>

@@ -13,12 +13,17 @@ const isProtectedRoute = createRouteMatcher([
 export default clerkMiddleware(async (auth, req) => {
   const { userId } = await auth();
 
-  if (!userId && isProtectedRoute(req)) {
-    const { redirectToSignIn } = await auth();
-    return redirectToSignIn();
-  }
+  // Create response with enhanced headers
+  const response = userId || !isProtectedRoute(req) 
+    ? NextResponse.next() 
+    : (await auth()).redirectToSignIn();
 
-  return NextResponse.next();
+  // Add performance and security headers
+  response.headers.set('X-DNS-Prefetch-Control', 'on');
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+  response.headers.set('Referrer-Policy', 'origin-when-cross-origin');
+
+  return response;
 });
 
 export const config = {
