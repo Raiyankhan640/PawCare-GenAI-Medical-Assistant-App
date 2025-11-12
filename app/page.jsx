@@ -1,15 +1,193 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Stethoscope } from "lucide-react";
+import { 
+  ArrowRight, 
+  Stethoscope,
+  Calendar,
+  Video,
+  CreditCard,
+  User,
+  FileText,
+  ShieldCheck 
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Pricing from "@/components/pricing";
-import { creditBenefits, features, testimonials } from "@/lib/data";
+import { creditBenefits } from "@/lib/data";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function Home() {
+  const heroRef = useRef(null);
+  const featuresRef = useRef(null);
+  const testimonialsRef = useRef(null);
+  
+  // Define features with icons inline
+  const features = [
+    {
+      icon: <User className="h-6 w-6 text-emerald-400" />,
+      title: "Create Your Profile",
+      description:
+        "Sign up and complete your profile to get personalized healthcare recommendations and services.",
+    },
+    {
+      icon: <Calendar className="h-6 w-6 text-emerald-400" />,
+      title: "Book Appointments",
+      description:
+        "Browse doctor profiles, check availability, and book appointments that fit your schedule.",
+    },
+    {
+      icon: <Video className="h-6 w-6 text-emerald-400" />,
+      title: "Video Consultation",
+      description:
+        "Connect with doctors through secure, high-quality video consultations from the comfort of your home.",
+    },
+    {
+      icon: <CreditCard className="h-6 w-6 text-emerald-400" />,
+      title: "Consultation Credits",
+      description:
+        "Purchase credit packages that fit your healthcare needs with our simple subscription model.",
+    },
+    {
+      icon: <ShieldCheck className="h-6 w-6 text-emerald-400" />,
+      title: "Verified Doctors",
+      description:
+        "All healthcare providers are carefully vetted and verified to ensure quality care.",
+    },
+    {
+      icon: <FileText className="h-6 w-6 text-emerald-400" />,
+      title: "Medical Documentation",
+      description:
+        "Access and manage your appointment history, doctor's notes, and medical recommendations.",
+    },
+  ];
+
+  // Define testimonials inline
+  const testimonials = [
+    {
+      initials: "SP",
+      name: "Sarah P.",
+      role: "Patient",
+      quote:
+        "The video consultation feature saved me so much time. I was able to get medical advice without taking time off work or traveling to a clinic.",
+    },
+    {
+      initials: "DR",
+      name: "Dr. Robert M.",
+      role: "Cardiologist",
+      quote:
+        "This platform has revolutionized my practice. I can now reach more patients and provide timely care without the constraints of a physical office.",
+    },
+    {
+      initials: "JT",
+      name: "James T.",
+      role: "Patient",
+      quote:
+        "The credit system is so convenient. I purchased a package for my family, and we've been able to consult with specialists whenever needed.",
+    },
+  ];
+  
+  // Debug: Log to ensure data is loaded
+  useEffect(() => {
+    console.log("Features loaded:", features.length);
+    console.log("Testimonials loaded:", testimonials.length);
+    console.log("First feature:", features[0]);
+    console.log("First testimonial:", testimonials[0]);
+  }, [features, testimonials]);
+  
+  useEffect(() => {
+    // Set initial visibility to prevent blank content
+    gsap.set(".hero-badge, .hero-title, .hero-description, .hero-buttons, .hero-image", { opacity: 1 });
+    gsap.set(".feature-card, .testimonial-card", { opacity: 1 });
+    
+    // Hero section animations
+    const ctx = gsap.context(() => {
+      // Animate from transparent
+      gsap.from(".hero-badge", {
+        opacity: 0,
+        y: -20,
+        duration: 0.6,
+        ease: "power3.out"
+      });
+      
+      gsap.from(".hero-title", {
+        opacity: 0,
+        y: 30,
+        duration: 0.8,
+        delay: 0.2,
+        ease: "power3.out"
+      });
+      
+      gsap.from(".hero-description", {
+        opacity: 0,
+        y: 20,
+        duration: 0.8,
+        delay: 0.4,
+        ease: "power3.out"
+      });
+      
+      gsap.from(".hero-buttons", {
+        opacity: 0,
+        y: 20,
+        duration: 0.8,
+        delay: 0.6,
+        ease: "power3.out"
+      });
+      
+      gsap.from(".hero-image", {
+        opacity: 0,
+        x: 50,
+        duration: 1,
+        delay: 0.8,
+        ease: "power3.out"
+      });
+      
+      // Features cards animation with better trigger
+      if (featuresRef.current) {
+        gsap.from(".feature-card", {
+          scrollTrigger: {
+            trigger: featuresRef.current,
+            start: "top 90%",
+            toggleActions: "play none none none"
+          },
+          opacity: 0,
+          y: 50,
+          stagger: 0.15,
+          duration: 0.8,
+          ease: "power3.out",
+          clearProps: "all"
+        });
+      }
+      
+      // Testimonials animation with better trigger
+      if (testimonialsRef.current) {
+        gsap.from(".testimonial-card", {
+          scrollTrigger: {
+            trigger: testimonialsRef.current,
+            start: "top 90%",
+            toggleActions: "play none none none"
+          },
+          opacity: 0,
+          scale: 0.9,
+          stagger: 0.1,
+          duration: 0.6,
+          ease: "back.out(1.2)",
+          clearProps: "all"
+        });
+      }
+    }, heroRef);
+    
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <div className="bg-background">
+    <div className="bg-background" ref={heroRef}>
       {/* Hero Section */}
       <section className="relative overflow-hidden py-32">
         <div className="container mx-auto px-4">
@@ -17,54 +195,63 @@ export default function Home() {
             <div className="space-y-8">
               <Badge
                 variant="outline"
-                className="bg-emerald-900/30 border-emerald-700/30 px-4 py-2 text-emerald-400 text-sm font-medium"
+                className="hero-badge bg-emerald-900/30 border-emerald-700/30 px-4 py-2 text-emerald-400 text-sm font-medium backdrop-blur-sm"
               >
                 Healthcare made simple
               </Badge>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
+              <h1 className="hero-title text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
                 Connect with doctors <br />
-                <span className="gradient-title">anytime, anywhere</span>
+                <span className="gradient-title bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent animate-gradient">
+                  anytime, anywhere
+                </span>
               </h1>
-              <p className="text-muted-foreground text-lg md:text-xl max-w-md">
+              <p className="hero-description text-muted-foreground text-lg md:text-xl max-w-md">
                 Book appointments, consult via video, and manage your healthcare
                 journey all in one secure platform.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="hero-buttons flex flex-col sm:flex-row gap-4">
                 <Button
                   asChild
                   size="lg"
-                  className="bg-emerald-600 text-white hover:bg-emerald-700"
+                  className="bg-gradient-to-r from-emerald-600 to-emerald-500 text-white hover:from-emerald-700 hover:to-emerald-600 shadow-lg shadow-emerald-500/25 relative overflow-hidden group"
                 >
                   <Link href="/onboarding">
-                    Get Started <ArrowRight className="ml-2 h-4 w-4" />
+                    <span className="relative z-10">Get Started</span>
+                    <ArrowRight className="ml-2 h-4 w-4 relative z-10 group-hover:translate-x-1 transition-transform" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </Link>
                 </Button>
                 <Button
                   asChild
                   variant="outline"
                   size="lg"
-                  className="border-emerald-700/30 hover:bg-muted/80"
+                  className="border-emerald-700/30 hover:bg-emerald-900/20 backdrop-blur-sm"
                 >
                   <Link href="/doctors">Find Doctors</Link>
                 </Button>
               </div>
             </div>
 
-            <div className="relative h-[400px] lg:h-[500px] rounded-xl overflow-hidden">
+            <div className="hero-image relative h-[400px] lg:h-[500px] rounded-xl overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-tr from-emerald-600/20 to-transparent rounded-xl z-10"></div>
               <Image
                 src="/banner2.png"
                 alt="Doctor consultation"
                 fill
                 priority
-                className="object-cover md:pt-14 rounded-xl"
+                className="object-cover md:pt-14 rounded-xl hover:scale-105 transition-transform duration-700"
               />
             </div>
           </div>
         </div>
+        
+        {/* Floating elements for visual appeal */}
+        <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-muted/30">
+      <section className="py-20 bg-muted/30" ref={featuresRef}>
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
@@ -79,18 +266,20 @@ export default function Home() {
             {features.map((feature, index) => (
               <Card
                 key={index}
-                className="bg-card border-emerald-900/20 hover:border-emerald-800/40 transition-all duration-300"
+                style={{ opacity: 1, visibility: 'visible' }}
+                className="feature-card bg-card/50 backdrop-blur-sm border-emerald-900/20 hover:border-emerald-800/40 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-emerald-500/10 cursor-pointer group relative overflow-hidden"
               >
-                <CardHeader className="pb-2">
-                  <div className="bg-emerald-900/20 p-3 rounded-lg w-fit mb-4">
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <CardHeader className="pb-2 relative z-10">
+                  <div className="bg-gradient-to-br from-emerald-900/30 to-emerald-800/20 p-3 rounded-lg w-fit mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
                     {feature.icon}
                   </div>
-                  <CardTitle className="text-xl font-semibold text-white">
+                  <CardTitle className="text-xl font-semibold text-white group-hover:text-emerald-400 transition-colors duration-300">
                     {feature.title}
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">{feature.description}</p>
+                <CardContent className="relative z-10">
+                  <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -163,12 +352,12 @@ export default function Home() {
       </section>
 
       {/* Testimonials with green medical accents */}
-      <section className="py-20 bg-muted/30">
+      <section className="py-20 bg-muted/30" ref={testimonialsRef}>
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <Badge
               variant="outline"
-              className="bg-emerald-900/30 border-emerald-700/30 px-4 py-1 text-emerald-400 text-sm font-medium mb-4"
+              className="bg-emerald-900/30 border-emerald-700/30 px-4 py-1 text-emerald-400 text-sm font-medium mb-4 backdrop-blur-sm"
             >
               Success Stories
             </Badge>
@@ -184,12 +373,14 @@ export default function Home() {
             {testimonials.map((testimonial, index) => (
               <Card
                 key={index}
-                className="border-emerald-900/20 hover:border-emerald-800/40 transition-all"
+                style={{ opacity: 1, visibility: 'visible' }}
+                className="testimonial-card border-emerald-900/20 hover:border-emerald-800/40 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-emerald-500/10 cursor-pointer bg-card/50 backdrop-blur-sm relative overflow-hidden group"
               >
-                <CardContent className="pt-6">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-emerald-500/10 to-transparent rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500"></div>
+                <CardContent className="pt-6 relative z-10">
                   <div className="flex items-center mb-4">
-                    <div className="w-12 h-12 rounded-full bg-emerald-900/20 flex items-center justify-center mr-4">
-                      <span className="text-emerald-400 font-bold">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-900/30 to-emerald-800/20 flex items-center justify-center mr-4 transition-all duration-300 group-hover:scale-110 shadow-lg">
+                      <span className="text-emerald-400 font-bold text-lg">
                         {testimonial.initials}
                       </span>
                     </div>
@@ -202,7 +393,7 @@ export default function Home() {
                       </p>
                     </div>
                   </div>
-                  <p className="text-muted-foreground">
+                  <p className="text-muted-foreground leading-relaxed italic">
                     &quot;{testimonial.quote}&quot;
                   </p>
                 </CardContent>

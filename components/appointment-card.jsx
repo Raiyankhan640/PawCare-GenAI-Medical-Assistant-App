@@ -228,15 +228,16 @@ export function AppointmentCard({
 
   return (
     <>
-      <Card className="border-emerald-900/20 hover:border-emerald-700/30 transition-all">
-        <CardContent className="p-4">
+      <Card className="border-emerald-900/20 hover:border-emerald-700/30 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/10 hover:scale-[1.01] group bg-card/50 backdrop-blur-sm relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        <CardContent className="p-4 relative z-10">
           <div className="flex flex-col md:flex-row justify-between gap-4">
             <div className="flex items-start gap-3">
-              <div className="bg-muted/20 rounded-full p-2 mt-1">
+              <div className="bg-gradient-to-br from-emerald-900/30 to-emerald-800/20 rounded-full p-2 mt-1 group-hover:scale-110 transition-transform duration-300 shadow-lg">
                 {otherPartyIcon}
               </div>
               <div>
-                <h3 className="font-medium text-white">
+                <h3 className="font-medium text-white group-hover:text-emerald-400 transition-colors duration-300">
                   {userRole === "DOCTOR"
                     ? otherParty.name
                     : `Dr. ${otherParty.name}`}
@@ -252,11 +253,11 @@ export function AppointmentCard({
                   </p>
                 )}
                 <div className="flex items-center mt-2 text-sm text-muted-foreground">
-                  <Calendar className="h-4 w-4 mr-1" />
+                  <Calendar className="h-4 w-4 mr-1 text-emerald-400" />
                   <span>{formatDateTime(appointment.startTime)}</span>
                 </div>
                 <div className="flex items-center mt-1 text-sm text-muted-foreground">
-                  <Clock className="h-4 w-4 mr-1" />
+                  <Clock className="h-4 w-4 mr-1 text-emerald-400" />
                   <span>
                     {formatTime(appointment.startTime)} -{" "}
                     {formatTime(appointment.endTime)}
@@ -269,10 +270,10 @@ export function AppointmentCard({
                 variant="outline"
                 className={
                   appointment.status === "COMPLETED"
-                    ? "bg-emerald-900/20 border-emerald-900/30 text-emerald-400"
+                    ? "bg-emerald-900/20 border-emerald-900/30 text-emerald-400 shadow-sm"
                     : appointment.status === "CANCELLED"
-                    ? "bg-red-900/20 border-red-900/30 text-red-400"
-                    : "bg-amber-900/20 border-amber-900/30 text-amber-400"
+                    ? "bg-red-900/20 border-red-900/30 text-red-400 shadow-sm"
+                    : "bg-amber-900/20 border-amber-900/30 text-amber-400 shadow-sm"
                 }
               >
                 {appointment.status}
@@ -283,7 +284,7 @@ export function AppointmentCard({
                     size="sm"
                     onClick={handleMarkCompleted}
                     disabled={completeLoading}
-                    className="bg-emerald-600 hover:bg-emerald-700"
+                    className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 shadow-lg shadow-emerald-500/25"
                   >
                     {completeLoading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -298,7 +299,7 @@ export function AppointmentCard({
                 <Button
                   size="sm"
                   variant="outline"
-                  className="border-emerald-900/30"
+                  className="border-emerald-900/30 hover:bg-emerald-900/20 backdrop-blur-sm"
                   onClick={() => setOpen(true)}
                 >
                   View Details

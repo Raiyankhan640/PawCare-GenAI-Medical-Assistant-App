@@ -55,10 +55,10 @@ export default function RootLayout({ children }) {
                   <div>
                     <h3 className="font-semibold mb-4">Quick Links</h3>
                     <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li><a href="/about" className="hover:text-primary">About Us</a></li>
-                      <li><a href="/services" className="hover:text-primary">Our Services</a></li>
-                      <li><a href="/doctors" className="hover:text-primary">Find a Vet</a></li>
-                      <li><a href="/contact" className="hover:text-primary">Contact</a></li>
+                      <li><a href="/about" className="hover:text-emerald-400 transition-colors duration-200 cursor-pointer">About Us</a></li>
+                      <li><a href="/services" className="hover:text-emerald-400 transition-colors duration-200 cursor-pointer">Our Services</a></li>
+                      <li><a href="/doctors" className="hover:text-emerald-400 transition-colors duration-200 cursor-pointer">Find a Vet</a></li>
+                      <li><a href="/contact" className="hover:text-emerald-400 transition-colors duration-200 cursor-pointer">Contact</a></li>
                     </ul>
                   </div>
 
@@ -66,10 +66,10 @@ export default function RootLayout({ children }) {
                   <div>
                     <h3 className="font-semibold mb-4">Services</h3>
                     <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li><a href="/appointments" className="hover:text-primary">Book Appointment</a></li>
-                      <li><a href="/emergency" className="hover:text-primary">Emergency Care</a></li>
-                      <li><a href="/telemedicine" className="hover:text-primary">Video Consultation</a></li>
-                      <li><a href="/pharmacy" className="hover:text-primary">Pet Pharmacy</a></li>
+                      <li><a href="/appointments" className="hover:text-emerald-400 transition-colors duration-200 cursor-pointer">Book Appointment</a></li>
+                      <li><a href="/emergency" className="hover:text-emerald-400 transition-colors duration-200 cursor-pointer">Emergency Care</a></li>
+                      <li><a href="/telemedicine" className="hover:text-emerald-400 transition-colors duration-200 cursor-pointer">Video Consultation</a></li>
+                      <li><a href="/pharmacy" className="hover:text-emerald-400 transition-colors duration-200 cursor-pointer">Pet Pharmacy</a></li>
                     </ul>
                   </div>
 

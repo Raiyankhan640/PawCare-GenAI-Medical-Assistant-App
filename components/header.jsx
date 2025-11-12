@@ -15,15 +15,12 @@ import { checkUser } from "@/lib/checkUser";
 
 export async function Header() {
   const user = checkUser();
-  if (user?.role === "PATIENT") {
-    await syncUser();
-  }
 
   return (
     <header className="border-b sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo Section */}
-        <Link href="/" className="flex items-center gap-2 cursor-pointer">
+        <Link href="/" className="flex items-center gap-2 cursor-pointer hover:scale-105 transition-transform duration-200">
           <Image
             src="/logo-single.png"
             alt="PawCare Logo"
@@ -40,25 +37,25 @@ export async function Header() {
         <nav className="hidden md:flex items-center gap-6">
           <Link 
             href="/" 
-            className="text-sm font-medium text-muted-foreground hover:text-emerald-400 transition-colors"
+            className="text-sm font-medium text-muted-foreground hover:text-emerald-400 transition-all duration-200 cursor-pointer hover:scale-105"
           >
             Home
           </Link>
           <Link 
             href="/doctors" 
-            className="text-sm font-medium text-muted-foreground hover:text-emerald-400 transition-colors"
+            className="text-sm font-medium text-muted-foreground hover:text-emerald-400 transition-all duration-200 cursor-pointer hover:scale-105"
           >
             Find Vets
           </Link>
           <Link 
             href="/about" 
-            className="text-sm font-medium text-muted-foreground hover:text-emerald-400 transition-colors"
+            className="text-sm font-medium text-muted-foreground hover:text-emerald-400 transition-all duration-200 cursor-pointer hover:scale-105"
           >
             About Us
           </Link>
           <Link 
             href="/contact" 
-            className="text-sm font-medium text-muted-foreground hover:text-emerald-400 transition-colors"
+            className="text-sm font-medium text-muted-foreground hover:text-emerald-400 transition-all duration-200 cursor-pointer hover:scale-105"
           >
             Contact
           </Link>
