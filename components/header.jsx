@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -18,10 +18,21 @@ import {
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
+import { getUserCredits } from "@/actions/user";
 
 export function Header() {
   const pathname = usePathname();
   const { user: clerkUser } = useUser();
+  const [userCredits, setUserCredits] = useState(0);
+  
+  // Fetch user credits from database
+  useEffect(() => {
+    if (clerkUser) {
+      getUserCredits().then((data) => {
+        setUserCredits(data.credits);
+      });
+    }
+  }, [clerkUser]);
   
   // Helper function to check if link is active
   const isActive = (path) => {
@@ -236,7 +247,7 @@ export function Header() {
                 <span className="text-emerald-400 font-semibold">
                   {clerkUser && clerkUser.publicMetadata?.role !== "ADMIN" ? (
                     <>
-                      {clerkUser.publicMetadata?.credits || 0}{" "}
+                      {userCredits}{" "}
                       <span className="hidden md:inline">
                         {clerkUser?.publicMetadata?.role === "PATIENT"
                           ? "Credits"

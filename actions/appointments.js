@@ -7,11 +7,16 @@ import { deductCreditsForAppointment } from "@/actions/credits";
 import { Vonage } from "@vonage/server-sdk";
 import { addDays, addMinutes, format, isBefore, endOfDay } from "date-fns";
 import { Auth } from "@vonage/auth";
+import fs from "fs";
+import path from "path";
 
 // Initialize Vonage Video API client
+const privateKeyPath = path.join(process.cwd(), 'lib', 'private.key');
+const privateKey = process.env.VONAGE_PRIVATE_KEY || fs.readFileSync(privateKeyPath, 'utf8');
+
 const credentials = new Auth({
   applicationId: process.env.NEXT_PUBLIC_VONAGE_APPLICATION_ID,
-  privateKey: process.env.VONAGE_PRIVATE_KEY,
+  privateKey: privateKey,
 });
 const options = {};
 const vonage = new Vonage(credentials, options);
@@ -133,8 +138,9 @@ export async function bookAppointment(formData) {
       throw new Error("This time slot is already booked");
     }
 
-    // Create a new Vonage Video API session
-    const sessionId = await createVideoSession();
+    // Create a new Vonage Video API session (skipped for now)
+    // const sessionId = await createVideoSession();
+    const sessionId = null; // Temporarily skip video session creation
 
     // Deduct credits from patient and add to doctor
     const { success, error } = await deductCreditsForAppointment(
@@ -155,7 +161,7 @@ export async function bookAppointment(formData) {
         endTime,
         patientDescription,
         status: "SCHEDULED",
-        videoSessionId: sessionId, // Store the Vonage session ID
+        videoSessionId: sessionId, // Store the Vonage session ID (null for now)
       },
     });
 

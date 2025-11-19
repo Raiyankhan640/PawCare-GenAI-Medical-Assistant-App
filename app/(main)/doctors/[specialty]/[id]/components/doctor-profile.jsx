@@ -233,7 +233,7 @@ export function DoctorProfile({ doctor, availableDays }) {
 
                 <div className="flex w-full flex-col gap-3 pt-4">
                   <Button
-                    className="w-full bg-linear-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30"
+                    className="w-full bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/30 transition-all"
                     onClick={toggleBooking}
                   >
                     Book an appointment
