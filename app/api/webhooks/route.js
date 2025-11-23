@@ -56,24 +56,32 @@ export async function POST(req) {
   console.log(`Webhook with an ID of ${id} and type of ${eventType}`);
   console.log("Webhook body:", body);
 
-  if (eventType === "user.created") {
+  // Handle both user.created and user.updated events to ensure all login methods work
+  if (eventType === "user.created" || eventType === "user.updated") {
     try {
       const { id, email_addresses, image_url, first_name, last_name } =
         evt.data;
 
-      const user = await db.user.create({
-        data: {
+      // Use upsert to handle both new users and updates to existing users
+      const user = await db.user.upsert({
+        where: { clerkUserId: id },
+        update: {
+          name: `${first_name || ""} ${last_name || ""}`.trim(),
+          imageUrl: image_url,
+          email: email_addresses[0]?.email_address,
+        },
+        create: {
           clerkUserId: id,
           name: `${first_name || ""} ${last_name || ""}`.trim(),
           imageUrl: image_url,
-          email: email_addresses[0].email_address,
+          email: email_addresses[0]?.email_address,
         },
       });
 
-      console.log("User created in database:", user);
+      console.log(`User ${eventType === "user.created" ? "created" : "updated"} in database:`, user);
     } catch (error) {
-      console.error("Error creating user in database:", error);
-      return new Response("Error creating user", {
+      console.error(`Error ${eventType === "user.created" ? "creating" : "updating"} user in database:`, error);
+      return new Response(`Error ${eventType === "user.created" ? "creating" : "updating"} user`, {
         status: 400,
       });
     }
