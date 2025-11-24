@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/prisma.js";
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 
 /**
@@ -15,13 +15,27 @@ export async function setUserRole(formData) {
   }
 
   try {
-    // Find user in our database with better error handling
-    const user = await db.user.findUnique({
+    // Get user data from Clerk
+    const client = await clerkClient();
+    const clerkUser = await client.users.getUser(userId);
+
+    // Ensure user exists in database (create if not exists)
+    let user = await db.user.findUnique({
       where: { clerkUserId: userId },
     });
 
     if (!user) {
-      throw new Error("User not found in database");
+      // User doesn't exist in database, create them now
+      console.log("User not found in database, creating from Clerk data...");
+      user = await db.user.create({
+        data: {
+          clerkUserId: userId,
+          email: clerkUser.emailAddresses[0]?.emailAddress || "",
+          name: `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim() || "User",
+          imageUrl: clerkUser.imageUrl || "",
+        },
+      });
+      console.log("User created successfully:", user);
     }
 
     const role = formData.get("role");
@@ -76,14 +90,14 @@ export async function setUserRole(formData) {
     }
   } catch (error) {
     console.error("Database operation failed:", error);
-    
+
     // More specific error messages
-    if (error.message.includes("Can't reach database server") || 
-        error.message.includes("connection") ||
-        error.code === "P1001") {
+    if (error.message.includes("Can't reach database server") ||
+      error.message.includes("connection") ||
+      error.code === "P1001") {
       throw new Error("Database connection failed. Please try again later.");
     }
-    
+
     throw new Error(`Failed to update user profile: ${error.message}`);
   }
 }
@@ -108,15 +122,15 @@ export async function getCurrentUser() {
     return user;
   } catch (error) {
     console.error("Failed to get user information:", error);
-    
+
     // Handle database connection errors gracefully
-    if (error.message.includes("Can't reach database server") || 
-        error.message.includes("connection") ||
-        error.code === "P1001") {
+    if (error.message.includes("Can't reach database server") ||
+      error.message.includes("connection") ||
+      error.code === "P1001") {
       console.error("Database connection error - returning null");
       return null;
     }
-    
+
     return null;
   }
 }
