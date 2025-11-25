@@ -3,6 +3,8 @@
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 
+import { checkAndAllocateCredits } from "./credits";
+
 /**
  * Get current user's credits from database
  */
@@ -13,12 +15,22 @@ export async function getUserCredits() {
 
     const user = await db.user.findFirst({
       where: { clerkUserId: userId },
-      select: { credits: true, role: true },
+      include: {
+        transactions: {
+          orderBy: { createdAt: 'desc' },
+          take: 1
+        }
+      }
     });
 
+    if (!user) return { credits: 0, role: null };
+
+    // Check and allocate credits based on plan
+    const finalUser = await checkAndAllocateCredits(user) || user;
+
     return {
-      credits: user?.credits || 0,
-      role: user?.role || null
+      credits: finalUser?.credits || 0,
+      role: finalUser?.role || null
     };
   } catch (error) {
     console.error("Error fetching user credits:", error);
