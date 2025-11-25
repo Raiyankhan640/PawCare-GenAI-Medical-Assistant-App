@@ -33,15 +33,37 @@ async function getOrCreatePatientByClerkId(clerkId) {
   if (!user) {
     // Pull basic info from Clerk to hydrate the record
     const cu = await currentUser().catch(() => null);
-    user = await db.user.create({
-      data: {
-        clerkUserId: clerkId,
-        email: cu?.emailAddresses?.[0]?.emailAddress ?? null,
-        name: cu?.fullName ?? cu?.firstName ?? "Pet Owner",
-        role: "PATIENT",
-        credits: 5, // enough to book at least once
-      },
-    });
+    const email = cu?.emailAddresses?.[0]?.emailAddress ?? null;
+
+    // If we have an email, check if a user with this email already exists
+    if (email) {
+      user = await db.user.findFirst({
+        where: { email: email },
+      });
+    }
+
+    // If no user found by email, create a new one
+    if (!user) {
+      user = await db.user.create({
+        data: {
+          clerkUserId: clerkId,
+          email: email,
+          name: cu?.fullName ?? cu?.firstName ?? "Pet Owner",
+          role: "PATIENT",
+          credits: 5, // enough to book at least once
+        },
+      });
+    } else {
+      // User exists by email but not by clerkUserId - update with clerkUserId
+      user = await db.user.update({
+        where: { id: user.id },
+        data: {
+          clerkUserId: clerkId,
+          // Also update role if it's UNASSIGNED
+          role: user.role === "UNASSIGNED" ? "PATIENT" : user.role
+        },
+      });
+    }
     return user;
   }
 
