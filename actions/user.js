@@ -9,16 +9,19 @@ import { auth } from "@clerk/nextjs/server";
 export async function getUserCredits() {
   try {
     const { userId } = await auth();
-    if (!userId) return { credits: 0 };
+    if (!userId) return { credits: 0, role: null };
 
     const user = await db.user.findFirst({
       where: { clerkUserId: userId },
-      select: { credits: true },
+      select: { credits: true, role: true },
     });
 
-    return { credits: user?.credits || 0 };
+    return {
+      credits: user?.credits || 0,
+      role: user?.role || null
+    };
   } catch (error) {
     console.error("Error fetching user credits:", error);
-    return { credits: 0 };
+    return { credits: 0, role: null };
   }
 }

@@ -5,11 +5,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { SignedIn, SignedOut, UserButton, SignInButton, useUser } from "@clerk/nextjs";
-import { 
-  ShieldCheck, 
-  Stethoscope, 
-  Calendar, 
-  User, 
+import {
+  ShieldCheck,
+  Stethoscope,
+  Calendar,
+  User,
   CreditCard,
   Sparkles,
   Home,
@@ -24,16 +24,18 @@ export function Header() {
   const pathname = usePathname();
   const { user: clerkUser } = useUser();
   const [userCredits, setUserCredits] = useState(0);
-  
+  const [userRole, setUserRole] = useState(null);
+
   // Fetch user credits from database
   useEffect(() => {
     if (clerkUser) {
       getUserCredits().then((data) => {
         setUserCredits(data.credits);
+        setUserRole(data.role);
       });
     }
   }, [clerkUser]);
-  
+
   // Helper function to check if link is active
   const isActive = (path) => {
     if (path === "/") {
@@ -41,13 +43,13 @@ export function Header() {
     }
     return pathname.startsWith(path);
   };
-  
+
   // Get active styles
   const getNavLinkClass = (path) => {
     const baseClass = "group relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2";
     const activeClass = "text-emerald-400 bg-emerald-950/30 border border-emerald-500/30";
     const inactiveClass = "text-muted-foreground hover:text-emerald-400";
-    
+
     return `${baseClass} ${isActive(path) ? activeClass : inactiveClass}`;
   };
 
@@ -76,8 +78,8 @@ export function Header() {
 
         {/* Navigation Links - Enhanced with Active States */}
         <nav className="hidden md:flex items-center gap-2">
-          <Link 
-            href="/" 
+          <Link
+            href="/"
             className={getNavLinkClass("/")}
           >
             <Home className="h-4 w-4 group-hover:scale-110 transition-transform" />
@@ -89,9 +91,9 @@ export function Header() {
               <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-emerald-400 to-teal-400 group-hover:w-full transition-all duration-300"></div>
             )}
           </Link>
-          
-          <Link 
-            href="/doctors" 
+
+          <Link
+            href="/doctors"
             className={getNavLinkClass("/doctors")}
           >
             <Stethoscope className="h-4 w-4 group-hover:scale-110 transition-transform" />
@@ -103,9 +105,9 @@ export function Header() {
               <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-emerald-400 to-teal-400 group-hover:w-full transition-all duration-300"></div>
             )}
           </Link>
-          
-          <Link 
-            href="/about" 
+
+          <Link
+            href="/about"
             className={getNavLinkClass("/about")}
           >
             <Info className="h-4 w-4 group-hover:scale-110 transition-transform" />
@@ -117,9 +119,9 @@ export function Header() {
               <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-emerald-400 to-teal-400 group-hover:w-full transition-all duration-300"></div>
             )}
           </Link>
-          
-          <Link 
-            href="/contact" 
+
+          <Link
+            href="/contact"
             className={getNavLinkClass("/contact")}
           >
             <Phone className="h-4 w-4 group-hover:scale-110 transition-transform" />
@@ -131,15 +133,14 @@ export function Header() {
               <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-emerald-400 to-teal-400 group-hover:w-full transition-all duration-300"></div>
             )}
           </Link>
-          
+
           {/* Pricing - Highlighted */}
-          <Link 
-            href="/pricing" 
-            className={`relative ml-2 px-5 py-2.5 rounded-xl border text-emerald-400 transition-all duration-300 flex items-center gap-2 group overflow-hidden font-semibold ${
-              isActive("/pricing") 
-                ? "bg-gradient-to-r from-emerald-600/50 to-teal-600/50 border-emerald-400/60 shadow-xl shadow-emerald-500/30" 
+          <Link
+            href="/pricing"
+            className={`relative ml-2 px-5 py-2.5 rounded-xl border text-emerald-400 transition-all duration-300 flex items-center gap-2 group overflow-hidden font-semibold ${isActive("/pricing")
+                ? "bg-gradient-to-r from-emerald-600/50 to-teal-600/50 border-emerald-400/60 shadow-xl shadow-emerald-500/30"
                 : "bg-gradient-to-r from-emerald-600/30 to-teal-600/30 border-emerald-500/40 hover:from-emerald-600/40 hover:to-teal-600/40 hover:border-emerald-400/60 hover:shadow-xl hover:shadow-emerald-500/30"
-            }`}
+              }`}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-400/30 to-emerald-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
             <Sparkles className={`h-4 w-4 relative z-10 group-hover:rotate-12 group-hover:scale-110 transition-all ${isActive("/pricing") ? "animate-spin" : "animate-pulse"}`} />
@@ -156,16 +157,15 @@ export function Header() {
         {/* Action Buttons - Enhanced */}
         <div className="flex items-center gap-3">
           <SignedIn>
-           {/* Admin Links */}
+            {/* Admin Links */}
             {clerkUser?.publicMetadata?.role === "ADMIN" && (
               <Link href="/admin">
                 <Button
                   variant="outline"
-                  className={`hidden md:inline-flex items-center gap-2 transition-all ${
-                    isActive("/admin")
+                  className={`hidden md:inline-flex items-center gap-2 transition-all ${isActive("/admin")
                       ? "border-emerald-500/50 bg-emerald-900/40 text-emerald-400"
                       : "border-emerald-700/30 hover:bg-emerald-900/30 hover:border-emerald-600/50"
-                  }`}
+                    }`}
                 >
                   <ShieldCheck className="h-4 w-4" />
                   Admin
@@ -181,11 +181,10 @@ export function Header() {
               <Link href="/doctor">
                 <Button
                   variant="outline"
-                  className={`hidden md:inline-flex items-center gap-2 transition-all ${
-                    isActive("/doctor")
+                  className={`hidden md:inline-flex items-center gap-2 transition-all ${isActive("/doctor")
                       ? "border-emerald-500/50 bg-emerald-900/40 text-emerald-400"
                       : "border-emerald-700/30 hover:bg-emerald-900/30 hover:border-emerald-600/50"
-                  }`}
+                    }`}
                 >
                   <Stethoscope className="h-4 w-4" />
                   Dashboard
@@ -201,11 +200,10 @@ export function Header() {
               <Link href="/appointments">
                 <Button
                   variant="outline"
-                  className={`hidden md:inline-flex items-center gap-2 transition-all ${
-                    isActive("/appointments")
+                  className={`hidden md:inline-flex items-center gap-2 transition-all ${isActive("/appointments")
                       ? "border-emerald-500/50 bg-emerald-900/40 text-emerald-400"
                       : "border-emerald-700/30 hover:bg-emerald-900/30 hover:border-emerald-600/50"
-                  }`}
+                    }`}
                 >
                   <Calendar className="h-4 w-4" />
                   Appointments
@@ -221,11 +219,10 @@ export function Header() {
               <Link href="/onboarding">
                 <Button
                   variant="outline"
-                  className={`hidden md:inline-flex items-center gap-2 transition-all ${
-                    isActive("/onboarding")
+                  className={`hidden md:inline-flex items-center gap-2 transition-all ${isActive("/onboarding")
                       ? "border-emerald-500/50 bg-emerald-900/40 text-emerald-400"
                       : "border-emerald-700/30 hover:bg-emerald-900/30 hover:border-emerald-600/50"
-                  }`}
+                    }`}
                 >
                   <User className="h-4 w-4" />
                   Complete Profile
@@ -249,9 +246,9 @@ export function Header() {
                     <>
                       {userCredits}{" "}
                       <span className="hidden md:inline">
-                        {clerkUser?.publicMetadata?.role === "PATIENT"
-                          ? "Credits"
-                          : "Earned"}
+                        {userRole === "PATIENT"
+                          ? "Available Credits"
+                          : "Earned Credit"}
                       </span>
                     </>
                   ) : (
@@ -263,9 +260,9 @@ export function Header() {
           )}
 
           <SignedOut>
-            <Button 
-              asChild 
-              variant="outline" 
+            <Button
+              asChild
+              variant="outline"
               size="sm"
               className="border-emerald-700/30 hover:bg-emerald-900/30 hover:border-emerald-600/50 transition-all"
             >
@@ -290,7 +287,7 @@ export function Header() {
           </SignedIn>
         </div>
       </div>
-      
+
       {/* Bottom Border Glow */}
       <div className="h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent"></div>
     </header>
