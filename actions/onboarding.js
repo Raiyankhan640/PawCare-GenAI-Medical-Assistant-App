@@ -19,24 +19,21 @@ export async function setUserRole(formData) {
     const client = await clerkClient();
     const clerkUser = await client.users.getUser(userId);
 
-    // Ensure user exists in database (create if not exists)
-    let user = await db.user.findUnique({
+    // Ensure user exists in database (upsert to handle both new and existing users)
+    await db.user.upsert({
       where: { clerkUserId: userId },
+      update: {
+        // Update basic info in case it changed in Clerk
+        name: `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim() || "User",
+        imageUrl: clerkUser.imageUrl || "",
+      },
+      create: {
+        clerkUserId: userId,
+        email: clerkUser.emailAddresses[0]?.emailAddress || "",
+        name: `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim() || "User",
+        imageUrl: clerkUser.imageUrl || "",
+      },
     });
-
-    if (!user) {
-      // User doesn't exist in database, create them now
-      console.log("User not found in database, creating from Clerk data...");
-      user = await db.user.create({
-        data: {
-          clerkUserId: userId,
-          email: clerkUser.emailAddresses[0]?.emailAddress || "",
-          name: `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim() || "User",
-          imageUrl: clerkUser.imageUrl || "",
-        },
-      });
-      console.log("User created successfully:", user);
-    }
 
     const role = formData.get("role");
 

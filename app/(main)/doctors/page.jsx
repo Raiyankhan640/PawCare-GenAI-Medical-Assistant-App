@@ -91,9 +91,9 @@ export default async function DoctorsPage() {
               size="lg"
               className="rounded-full bg-background hover:bg-emerald-950/30 text-white border-none px-8 py-6 h-auto text-lg font-semibold group relative overflow-hidden"
             >
-              <span className="relative z-10 flex items-center gap-3 px-3 py-2 rounded-md bg-muted/50 hover:bg-muted transition-colors group">
-                <Calendar className="w-5 h-5 text-primary" />
-                <span className="text-sm font-medium text-foreground">
+              <span className="relative z-10 flex items-center gap-3">
+                <Calendar className="w-6 h-6 text-emerald-400 group-hover:scale-110 transition-transform" />
+                <span className="bg-gradient-to-r from-white to-emerald-400 bg-clip-text text-transparent">
                   Check Your Appointments
                 </span>
               </span>
