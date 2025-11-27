@@ -11,12 +11,12 @@ export default async function PetChatPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-background via-emerald-950/5 to-background relative overflow-hidden">
+        <div className="min-h-screen bg-linear-to-br from-background via-emerald-950/5 to-background relative overflow-hidden">
             {/* Animated Background Effects */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
                 <div className="absolute bottom-20 right-10 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-emerald-500/5 to-teal-500/5 rounded-full blur-3xl" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-linear-to-r from-emerald-500/5 to-teal-500/5 rounded-full blur-3xl" />
             </div>
 
             <div className="container mx-auto px-4 py-8 relative z-10">
@@ -26,12 +26,12 @@ export default async function PetChatPage() {
                         <div className="flex items-center gap-3">
                             <div className="relative">
                                 <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-xl animate-pulse" />
-                                <div className="relative bg-gradient-to-br from-emerald-500 to-teal-500 p-3 rounded-full">
+                                <div className="relative bg-linear-to-br from-emerald-500 to-teal-500 p-3 rounded-full">
                                     <Sparkles className="h-6 w-6 text-white" />
                                 </div>
                             </div>
                             <div>
-                                <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
+                                <h1 className="text-3xl md:text-4xl font-bold bg-linear-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
                                     PetChat AI Assistant
                                 </h1>
                                 <p className="text-sm text-muted-foreground mt-1">
@@ -41,13 +41,13 @@ export default async function PetChatPage() {
                         </div>
                         <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20">
                             <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                            <span className="text-sm font-medium text-emerald-400">Online</span>
+                            <span className="text-sm font-medium text-emerald-400">AI Online</span>
                         </div>
                     </div>
 
                     {/* Instructions Card */}
                     <div className="grid md:grid-cols-3 gap-4 mb-6">
-                        <div className="bg-gradient-to-br from-emerald-900/20 to-teal-900/20 backdrop-blur-sm border border-emerald-500/20 rounded-xl p-4 hover:border-emerald-500/40 transition-all">
+                        <div className="bg-linear-to-br from-emerald-900/20 to-teal-900/20 backdrop-blur-sm border border-emerald-500/20 rounded-xl p-4 hover:border-emerald-500/40 transition-all">
                             <div className="flex items-start gap-3">
                                 <div className="bg-emerald-500/20 p-2 rounded-lg">
                                     <Stethoscope className="h-5 w-5 text-emerald-400" />
@@ -61,7 +61,7 @@ export default async function PetChatPage() {
                             </div>
                         </div>
 
-                        <div className="bg-gradient-to-br from-emerald-900/20 to-teal-900/20 backdrop-blur-sm border border-emerald-500/20 rounded-xl p-4 hover:border-emerald-500/40 transition-all">
+                        <div className="bg-linear-to-br from-emerald-900/20 to-teal-900/20 backdrop-blur-sm border border-emerald-500/20 rounded-xl p-4 hover:border-emerald-500/40 transition-all">
                             <div className="flex items-start gap-3">
                                 <div className="bg-teal-500/20 p-2 rounded-lg">
                                     <Shield className="h-5 w-5 text-teal-400" />
@@ -75,7 +75,7 @@ export default async function PetChatPage() {
                             </div>
                         </div>
 
-                        <div className="bg-gradient-to-br from-emerald-900/20 to-teal-900/20 backdrop-blur-sm border border-emerald-500/20 rounded-xl p-4 hover:border-emerald-500/40 transition-all">
+                        <div className="bg-linear-to-br from-emerald-900/20 to-teal-900/20 backdrop-blur-sm border border-emerald-500/20 rounded-xl p-4 hover:border-emerald-500/40 transition-all">
                             <div className="flex items-start gap-3">
                                 <div className="bg-cyan-500/20 p-2 rounded-lg">
                                     <AlertCircle className="h-5 w-5 text-cyan-400" />
@@ -91,7 +91,7 @@ export default async function PetChatPage() {
                     </div>
 
                     {/* Usage Instructions */}
-                    <div className="bg-gradient-to-br from-emerald-900/10 to-teal-900/10 backdrop-blur-sm border border-emerald-500/20 rounded-xl p-6">
+                    <div className="bg-linear-to-br from-emerald-900/10 to-teal-900/10 backdrop-blur-sm border border-emerald-500/20 rounded-xl p-6">
                         <h3 className="text-lg font-semibold text-emerald-400 mb-3 flex items-center gap-2">
                             <Sparkles className="h-5 w-5" />
                             How to Use

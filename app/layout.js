@@ -35,7 +35,7 @@ export default function RootLayout({ children }) {
             <main className="min-h-screen">{children}</main>
             <Toaster richColors />
 
-            <footer className="relative bg-gradient-to-b from-background via-emerald-950/5 to-background border-t border-emerald-900/20 overflow-hidden">
+            <footer className="relative bg-linear-to-b from-background via-emerald-950/5 to-background border-t border-emerald-900/20 overflow-hidden">
               {/* Animated Background Elements */}
               <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute -top-40 -left-40 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl animate-pulse"></div>
@@ -43,7 +43,7 @@ export default function RootLayout({ children }) {
               </div>
 
               {/* Top Glow Border */}
-              <div className="h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent"></div>
+              <div className="h-px bg-linear-to-r from-transparent via-emerald-500/50 to-transparent"></div>
 
               <div className="container mx-auto px-6 py-16 relative z-10">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
@@ -55,7 +55,7 @@ export default function RootLayout({ children }) {
                         <img src="/logo-single.png" alt="PawCare" className="h-12 w-auto relative z-10 group-hover:scale-110 transition-transform duration-300" />
                       </div>
                       <div className="flex flex-col">
-                        <span className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent font-bold text-3xl group-hover:from-emerald-300 group-hover:to-cyan-300 transition-all duration-300">
+                        <span className="bg-linear-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent font-bold text-3xl group-hover:from-emerald-300 group-hover:to-cyan-300 transition-all duration-300">
                           PawCare
                         </span>
                         <span className="text-xs text-muted-foreground -mt-1">Your Pet's Health Partner</span>
@@ -81,7 +81,7 @@ export default function RootLayout({ children }) {
                           aria-label={social.name}
                         >
                           <span className="text-xl group-hover:scale-125 transition-transform duration-300">{social.icon}</span>
-                          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-400/20 to-emerald-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                          <div className="absolute inset-0 bg-linear-to-r from-emerald-500/0 via-emerald-400/20 to-emerald-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
                         </a>
                       ))}
                     </div>
@@ -100,7 +100,7 @@ export default function RootLayout({ children }) {
                   {/* Quick Links */}
                   <div>
                     <h3 className="font-bold text-white mb-6 flex items-center gap-2 text-lg">
-                      <span className="w-1 h-6 bg-gradient-to-b from-emerald-400 to-teal-400 rounded-full"></span>
+                      <span className="w-1 h-6 bg-linear-to-b from-emerald-400 to-teal-400 rounded-full"></span>
                       Quick Links
                     </h3>
                     <ul className="space-y-3">
@@ -119,7 +119,7 @@ export default function RootLayout({ children }) {
                             <span className="text-base group-hover:scale-125 transition-transform duration-300">{link.icon}</span>
                             <span className="relative">
                               {link.name}
-                              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-emerald-400 to-teal-400 group-hover:w-full transition-all duration-300"></span>
+                              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-linear-to-r from-emerald-400 to-teal-400 group-hover:w-full transition-all duration-300"></span>
                             </span>
                           </a>
                         </li>
@@ -130,7 +130,7 @@ export default function RootLayout({ children }) {
                   {/* Services */}
                   <div>
                     <h3 className="font-bold text-white mb-6 flex items-center gap-2 text-lg">
-                      <span className="w-1 h-6 bg-gradient-to-b from-emerald-400 to-teal-400 rounded-full"></span>
+                      <span className="w-1 h-6 bg-linear-to-b from-emerald-400 to-teal-400 rounded-full"></span>
                       Services
                     </h3>
                     <ul className="space-y-3">
@@ -149,7 +149,7 @@ export default function RootLayout({ children }) {
                             <span className="text-base group-hover:scale-125 transition-transform duration-300">{service.icon}</span>
                             <span className="relative">
                               {service.name}
-                              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-emerald-400 to-teal-400 group-hover:w-full transition-all duration-300"></span>
+                              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-linear-to-r from-emerald-400 to-teal-400 group-hover:w-full transition-all duration-300"></span>
                             </span>
                           </a>
                         </li>
@@ -160,7 +160,7 @@ export default function RootLayout({ children }) {
                   {/* Contact Info */}
                   <div>
                     <h3 className="font-bold text-white mb-6 flex items-center gap-2 text-lg">
-                      <span className="w-1 h-6 bg-gradient-to-b from-emerald-400 to-teal-400 rounded-full"></span>
+                      <span className="w-1 h-6 bg-linear-to-b from-emerald-400 to-teal-400 rounded-full"></span>
                       Get in Touch
                     </h3>
                     <ul className="space-y-4">
@@ -193,7 +193,7 @@ export default function RootLayout({ children }) {
                     </ul>
 
                     {/* Newsletter */}
-                    <div className="mt-6 p-4 bg-gradient-to-br from-emerald-900/20 to-teal-900/20 rounded-xl border border-emerald-800/30">
+                    <div className="mt-6 p-4 bg-linear-to-br from-emerald-900/20 to-teal-900/20 rounded-xl border border-emerald-800/30">
                       <p className="text-xs text-muted-foreground mb-2">Get pet care tips</p>
                       <div className="flex gap-2">
                         <input 
