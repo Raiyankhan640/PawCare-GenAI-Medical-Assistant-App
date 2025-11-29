@@ -2,6 +2,29 @@
 
 PawCare is an AI-assisted Next.js platform that connects pet owners with verified veterinarians for virtual appointments, scheduling, and credit-based billing.
 
+## 🐾 Why PawCare?
+
+**The Problem**: Pet owners often struggle with accessing quality veterinary care—long wait times, limited clinic hours, expensive emergency visits, or living in areas with few specialists. When your furry friend is sick at midnight, you need answers fast.
+
+**The Solution**: PawCare bridges this gap by bringing veterinary expertise directly to your screen.
+
+### How PawCare Helps Pet Owners:
+- **Instant AI Guidance** — Get immediate symptom analysis and first-aid advice through our AI chatbot while waiting for professional consultation
+- **24/7 Access to Vets** — Book appointments with verified veterinarians from the comfort of your home, any time
+- **Specialist Matching** — Find the right vet for your pet's specific needs—dermatology, cardiology, exotic animals, and more
+- **Reduced Stress** — No more stressful car rides for routine checkups or follow-ups; consult via HD video calls
+- **Cost-Effective** — Save on emergency visit fees with preventive consultations and early symptom detection
+- **Medical Records** — Keep all consultation notes and prescriptions organized in one place
+
+### Why Pet Owners Trust PawCare:
+- ✅ All veterinarians are verified and credentialed before joining
+- ✅ Transparent credit-based pricing with no hidden fees
+- ✅ Secure video consultations with professional-grade quality
+- ✅ AI-powered symptom checker for quick preliminary assessments
+- ✅ Easy appointment scheduling with real-time availability
+
+---
+
 ## Features
 - Authenticated onboarding for patients, doctors, and admins (Clerk)
 - Dynamic doctor directory with specialty filters and animated profile pages

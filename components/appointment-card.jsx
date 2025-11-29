@@ -205,18 +205,21 @@ export function AppointmentCard({
     }
   }, [tokenData, appointment.id, router]);
 
-  // Determine if appointment is active (within 30 minutes of start time)
+  // Determine if appointment is active (no time restriction for testing)
   const isAppointmentActive = () => {
-    const now = new Date();
-    const appointmentTime = new Date(appointment.startTime);
-    const appointmentEndTime = new Date(appointment.endTime);
-
-    // Can join 30 minutes before start until end time
-    return (
-      (appointmentTime.getTime() - now.getTime() <= 30 * 60 * 1000 &&
-        now < appointmentTime) ||
-      (now >= appointmentTime && now <= appointmentEndTime)
-    );
+    // Always return true for SCHEDULED appointments to allow testing
+    // In production, you can add time-based restrictions
+    return appointment.status === "SCHEDULED";
+    
+    // Optional: Uncomment for production time restrictions
+    // const now = new Date();
+    // const appointmentTime = new Date(appointment.startTime);
+    // const appointmentEndTime = new Date(appointment.endTime);
+    // return (
+    //   (appointmentTime.getTime() - now.getTime() <= 30 * 60 * 1000 &&
+    //     now < appointmentTime) ||
+    //   (now >= appointmentTime && now <= appointmentEndTime)
+    // );
   };
 
   // Determine other party information based on user role
@@ -434,7 +437,7 @@ export function AppointmentCard({
                       <Video className="h-4 w-4 mr-2" />
                       {isAppointmentActive()
                         ? "Join Video Call"
-                        : "Video call will be available 30 minutes before appointment"}
+                        : "Video call not available"}
                     </>
                   )}
                 </Button>
