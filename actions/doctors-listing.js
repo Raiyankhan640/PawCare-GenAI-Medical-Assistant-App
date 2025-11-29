@@ -4,6 +4,7 @@ import { db } from "@/lib/prisma";
 
 /**
  * Get doctors by specialty
+ * Optimized: Only fetches fields needed for listing cards
  */
 export async function getDoctorsBySpecialty(specialty) {
   try {
@@ -12,6 +13,14 @@ export async function getDoctorsBySpecialty(specialty) {
         role: "DOCTOR",
         verificationStatus: "VERIFIED",
         specialty: specialty.split("%20").join(" "),
+      },
+      select: {
+        id: true,
+        name: true,
+        specialty: true,
+        imageUrl: true,
+        experience: true,
+        description: true,
       },
       orderBy: {
         name: "asc",

@@ -256,20 +256,20 @@ export async function generateVideoToken(formData) {
       throw new Error("This appointment is not currently scheduled");
     }
 
-    // Verify the appointment is within a valid time range (e.g., starting 5 minutes before scheduled time)
+    // Allow joining the call anytime for testing purposes
+    // In production, you can add time restrictions if needed
     const now = new Date();
     const appointmentTime = new Date(appointment.startTime);
-    const timeDifference = (appointmentTime - now) / (1000 * 60); // difference in minutes
-
-    if (timeDifference > 30) {
-      throw new Error(
-        "The call will be available 30 minutes before the scheduled time"
-      );
-    }
+    const appointmentEndTime = new Date(appointment.endTime);
+    
+    // Optional: Uncomment to restrict access to specific time window
+    // const timeDifference = (appointmentTime - now) / (1000 * 60);
+    // if (timeDifference > 30) {
+    //   throw new Error("The call will be available 30 minutes before the scheduled time");
+    // }
 
     // Generate a token for the video session
-    // Token expires 2 hours after the appointment start time
-    const appointmentEndTime = new Date(appointment.endTime);
+    // Token expires 1 hour after the appointment end time
     const expirationTime =
       Math.floor(appointmentEndTime.getTime() / 1000) + 60 * 60; // 1 hour after end time
 
@@ -310,6 +310,7 @@ export async function generateVideoToken(formData) {
 
 /**
  * Get doctor by ID
+ * Optimized: Only fetches fields needed for doctor profile
  */
 export async function getDoctorById(doctorId) {
   try {
@@ -318,6 +319,16 @@ export async function getDoctorById(doctorId) {
         id: doctorId,
         role: "DOCTOR",
         verificationStatus: "VERIFIED",
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        specialty: true,
+        imageUrl: true,
+        experience: true,
+        description: true,
+        credentials: true,
       },
     });
     if (!doctor) throw new Error("Doctor not found");
