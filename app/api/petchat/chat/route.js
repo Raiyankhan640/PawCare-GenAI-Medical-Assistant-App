@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { getGeminiResponse } from "@/lib/gemini";
-import { saveMessage } from "@/actions/petchat";
+import { getGeminiResponse, detectIntent } from "@/lib/gemini";
+import { saveMessage, getConversation, updateConversationTitle } from "@/actions/petchat";
 import { z } from "zod";
 
 const chatSchema = z.object({
@@ -37,16 +37,41 @@ export async function POST(req) {
     // Save user message
     await saveMessage(conversationId, "USER", message, imageUrl);
 
-    // Get AI response (use imageData for analysis, not imageUrl)
-    const messages = [{ role: "user", content: message }];
-    const aiResponse = await getGeminiResponse(messages, imageData);
+    // Detect intent (skip if image is present - always use GENERAL for images)
+    let intent = "GENERAL";
+    if (!imageData) {
+      intent = await detectIntent(message);
+    }
+
+    let aiResponse;
+
+    if (intent === "CLINIC_SEARCH") {
+      // Return special marker for client to trigger clinic search
+      aiResponse = "Let me help you find nearby veterinary clinics. Searching for clinics in your area...";
+    } else {
+      // Get normal AI response (use imageData for analysis, not imageUrl)
+      const messages = [{ role: "user", content: message }];
+      aiResponse = await getGeminiResponse(messages, imageData);
+    }
 
     // Save AI response
     await saveMessage(conversationId, "ASSISTANT", aiResponse);
 
+    // Auto-name conversation if it's still "New Chat"
+    try {
+      const conversationResult = await getConversation(conversationId);
+      if (conversationResult.success && conversationResult.conversation.title === "New Chat") {
+        await updateConversationTitle(conversationId, message);
+      }
+    } catch (error) {
+      console.error("Error auto-naming conversation:", error);
+      // Non-critical error, continue
+    }
+
     return NextResponse.json({
       success: true,
       response: aiResponse,
+      intent, // Send intent to client
     });
   } catch (error) {
     console.error("PetChat API error:", error);

@@ -328,7 +328,7 @@ export async function getDoctorById(doctorId) {
         imageUrl: true,
         experience: true,
         description: true,
-        credentials: true,
+        credentialUrl: true,
       },
     });
     if (!doctor) throw new Error("Doctor not found");

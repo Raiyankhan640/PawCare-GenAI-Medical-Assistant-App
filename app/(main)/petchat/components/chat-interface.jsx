@@ -12,13 +12,14 @@ import { toast } from "sonner";
 import VoiceInput from "./voice-input";
 import ImageUpload from "./image-upload";
 import AppointmentSuggestion from "./appointment-suggestion";
+import ClinicSearch from "./clinic-search";
 
-export default function ChatInterface() {
+export default function ChatInterface({ initialConversationId, onConversationChange }) {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
     const [isTyping, setIsTyping] = useState(false);
     const [isClient, setIsClient] = useState(false);
-    const [conversationId, setConversationId] = useState(null);
+    const [conversationId, setConversationId] = useState(initialConversationId);
     const [currentImageUrl, setCurrentImageUrl] = useState(null);
     const [currentImagePreview, setCurrentImagePreview] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -29,12 +30,25 @@ export default function ChatInterface() {
         setIsClient(true);
     }, []);
 
-    // Load conversation history on mount
+    // Load conversation history on mount and when conversationId changes
     useEffect(() => {
-        loadConversation();
-    }, []);
+        if (conversationId) {
+            loadConversation(conversationId);
+        }
+    }, [conversationId]);
 
-    const loadConversation = async () => {
+    // Update conversationId when prop changes
+    useEffect(() => {
+        if (initialConversationId && initialConversationId !== conversationId) {
+            setConversationId(initialConversationId);
+        }
+    }, [initialConversationId]);
+
+    const loadConversation = async (convId = conversationId) => {
+        if (!convId) {
+            setIsLoading(false);
+            return;
+        }
         try {
             const response = await fetch("/api/petchat/conversation");
             const data = await response.json();
@@ -112,10 +126,17 @@ export default function ChatInterface() {
             const data = await response.json();
 
             if (data.success) {
-                setMessages((prev) => [...prev, {
+                const assistantMessage = {
                     role: "assistant",
                     content: data.response,
-                }]);
+                };
+
+                // Check if this is a clinic search request
+                if (data.intent === "CLINIC_SEARCH") {
+                    assistantMessage.isClinicSearch = true;
+                }
+
+                setMessages((prev) => [...prev, assistantMessage]);
             } else {
                 throw new Error(data.error || "Failed to get response");
             }
@@ -235,7 +256,12 @@ export default function ChatInterface() {
                                             </div>
                                         )}
                                         <p className="text-sm leading-relaxed">{msg.content}</p>
-                                        {msg.role === "assistant" && <AppointmentSuggestion aiResponse={msg.content} />}
+                                        {msg.role === "assistant" && !msg.isClinicSearch && <AppointmentSuggestion aiResponse={msg.content} />}
+                                        {msg.role === "assistant" && msg.isClinicSearch && (
+                                            <div className="mt-4">
+                                                <ClinicSearch />
+                                            </div>
+                                        )}
                                         {isClient && (
                                             <p className="text-xs text-muted-foreground mt-2">
                                                 {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}

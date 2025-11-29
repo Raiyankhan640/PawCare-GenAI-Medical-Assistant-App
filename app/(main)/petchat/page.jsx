@@ -1,16 +1,39 @@
-import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
+"use client";
+
+import { useState } from "react";
 import Script from "next/script";
 import ChatInterface from "./components/chat-interface";
+import ConversationSidebar from "./components/conversation-sidebar";
 import LocationBookmark from "./components/location-bookmark";
 import { Sparkles, Shield, Stethoscope, AlertCircle } from "lucide-react";
+import { getOrCreateConversation } from "@/actions/petchat";
+import { useEffect } from "react";
 
-export default async function PetChatPage() {
-    const { userId } = await auth();
+export default function PetChatPage() {
+    const [currentConversationId, setCurrentConversationId] = useState(null);
 
-    if (!userId) {
-        redirect("/sign-in");
-    }
+    useEffect(() => {
+        // Load or create initial conversation
+        const initConversation = async () => {
+            try {
+                const result = await getOrCreateConversation();
+                if (result.success && result.conversation) {
+                    setCurrentConversationId(result.conversation.id);
+                }
+            } catch (error) {
+                console.error("Failed to init conversation:", error);
+            }
+        };
+        initConversation();
+    }, []);
+
+    const handleConversationSelect = (conversationId) => {
+        setCurrentConversationId(conversationId);
+    };
+
+    const handleNewConversation = (conversationId) => {
+        setCurrentConversationId(conversationId);
+    };
 
     return (
         <>
@@ -18,7 +41,7 @@ export default async function PetChatPage() {
                 src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDdQXgoFRxsNcZYVsY7MK069zDse8U_6k0&libraries=places&loading=async"
                 strategy="beforeInteractive"
             />
-            <div className="min-h-screen bg-gradient-to-br from-background via-emerald-950/5 to-background relative overflow-hidden">
+            <div className="min-h-screen bg-gradient-to-br from-background via-emerald-950/5 to-background relative overflow-hidden flex">
             {/* Animated Background Effects */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
@@ -26,7 +49,14 @@ export default async function PetChatPage() {
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-emerald-500/5 to-teal-500/5 rounded-full blur-3xl" />
             </div>
 
-            <div className="container mx-auto px-4 py-8 relative z-10">
+            {/* Sidebar */}
+            <ConversationSidebar
+                currentConversationId={currentConversationId}
+                onConversationSelect={handleConversationSelect}
+                onNewConversation={handleNewConversation}
+            />
+
+            <div className="flex-1 container mx-auto px-4 py-8 relative z-10 overflow-auto">
                 {/* Header Section */}
                 <div className="max-w-5xl mx-auto mb-8">
                     <div className="flex items-center justify-between mb-6">
@@ -130,7 +160,12 @@ export default async function PetChatPage() {
                 </div>
 
                 {/* Chat Interface */}
-                <ChatInterface />
+                {currentConversationId && (
+                    <ChatInterface
+                        initialConversationId={currentConversationId}
+                        onConversationChange={setCurrentConversationId}
+                    />
+                )}
             </div>
         </div>
         </>

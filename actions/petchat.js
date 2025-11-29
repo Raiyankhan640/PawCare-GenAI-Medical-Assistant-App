@@ -225,3 +225,103 @@ export async function deleteBookmarkedLocation(locationId) {
     throw new Error("Failed to delete location");
   }
 }
+
+/**
+ * Create a new conversation
+ */
+export async function createNewConversation() {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  try {
+    const user = await db.user.findFirst({ where: { clerkUserId: userId } });
+    if (!user) throw new Error("User not found");
+
+    const conversation = await db.chatConversation.create({
+      data: {
+        userId: user.id,
+        title: "New Chat",
+      },
+      include: { messages: true },
+    });
+
+    revalidatePath("/petchat");
+    return { success: true, conversation };
+  } catch (error) {
+    console.error("Error in createNewConversation:", error);
+    throw new Error("Failed to create conversation");
+  }
+}
+
+/**
+ * Update conversation title (auto-naming from first message)
+ */
+export async function updateConversationTitle(conversationId, title) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  try {
+    const user = await db.user.findFirst({ where: { clerkUserId: userId } });
+    if (!user) throw new Error("User not found");
+
+    // Verify ownership
+    const conversation = await db.chatConversation.findFirst({
+      where: {
+        id: conversationId,
+        userId: user.id,
+      },
+    });
+
+    if (!conversation) {
+      throw new Error("Conversation not found or unauthorized");
+    }
+
+    // Generate title from first message (max 30 chars)
+    const autoTitle = title.slice(0, 30) + (title.length > 30 ? "..." : "");
+
+    await db.chatConversation.update({
+      where: { id: conversationId },
+      data: { title: autoTitle },
+    });
+
+    revalidatePath("/petchat");
+    return { success: true };
+  } catch (error) {
+    console.error("Error in updateConversationTitle:", error);
+    throw new Error("Failed to update conversation title");
+  }
+}
+
+/**
+ * Get a specific conversation by ID
+ */
+export async function getConversation(conversationId) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  try {
+    const user = await db.user.findFirst({ where: { clerkUserId: userId } });
+    if (!user) throw new Error("User not found");
+
+    const conversation = await db.chatConversation.findFirst({
+      where: {
+        id: conversationId,
+        userId: user.id,
+      },
+      include: {
+        messages: {
+          orderBy: { createdAt: "asc" },
+        },
+      },
+    });
+
+    if (!conversation) {
+      throw new Error("Conversation not found");
+    }
+
+    return { success: true, conversation };
+  } catch (error) {
+    console.error("Error in getConversation:", error);
+    throw new Error("Failed to get conversation");
+  }
+}
