@@ -7,24 +7,69 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Bot, User, Send, Sparkles, AlertTriangle, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
+import { toast } from "sonner";
+import VoiceInput from "./voice-input";
+import ImageUpload from "./image-upload";
+import AppointmentSuggestion from "./appointment-suggestion";
 
 export default function ChatInterface() {
-    const [messages, setMessages] = useState([
-        {
-            role: "assistant",
-            content:
-                "Hello! I'm your PetCare AI Assistant. I can help you with medication suggestions and health advice for your pets. Please describe your pet's condition, including type, age, weight, and symptoms.",
-        },
-    ]);
+    const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
     const [isTyping, setIsTyping] = useState(false);
     const [isClient, setIsClient] = useState(false);
+    const [conversationId, setConversationId] = useState(null);
+    const [currentImageUrl, setCurrentImageUrl] = useState(null);
+    const [currentImagePreview, setCurrentImagePreview] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
     const messagesEndRef = useRef(null);
 
     // Detect client side for timestamps
     useEffect(() => {
         setIsClient(true);
     }, []);
+
+    // Load conversation history on mount
+    useEffect(() => {
+        loadConversation();
+    }, []);
+
+    const loadConversation = async () => {
+        try {
+            const response = await fetch("/api/petchat/conversation");
+            const data = await response.json();
+
+            if (data.success) {
+                setConversationId(data.conversation.id);
+
+                // Add welcome message if no messages exist
+                if (data.conversation.messages.length === 0) {
+                    setMessages([
+                        {
+                            role: "assistant",
+                            content: "Hello! I'm your PetCare AI Assistant. I can help you with medication suggestions and health advice for your pets. Please describe your pet's condition, including type, age, weight, and symptoms.",
+                        },
+                    ]);
+                } else {
+                    // Load existing messages and transform from database format
+                    const loadedMessages = data.conversation.messages.map(msg => ({
+                        role: msg.role.toLowerCase(),
+                        content: msg.content,
+                        imageUrl: msg.imageUrl,
+                        hasImage: msg.hasImage,
+                    }));
+                    setMessages(loadedMessages);
+                }
+            } else {
+                toast.error("Failed to load conversation");
+            }
+        } catch (error) {
+            console.error("Error loading conversation:", error);
+            toast.error("Failed to load conversation");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -35,23 +80,51 @@ export default function ChatInterface() {
     }, [messages]);
 
     const handleSend = async () => {
-        if (!input.trim()) return;
+        if (!input.trim() || !conversationId) return;
+
         const userMessage = {
             role: "user",
             content: input,
+            imageUrl: currentImageUrl,
+            hasImage: !!currentImageUrl,
         };
+
         setMessages((prev) => [...prev, userMessage]);
         setInput("");
+        const imageUrl = currentImageUrl;
+        const imageData = currentImagePreview; // Base64 data for Gemini
+        setCurrentImageUrl(null);
+        setCurrentImagePreview(null);
         setIsTyping(true);
-        // Simulate AI response (replace with real API later)
-        setTimeout(() => {
-            const aiMessage = {
-                role: "assistant",
-                content: `I'm here to help! This is a placeholder response. You asked: ${input}`,
-            };
-            setMessages((prev) => [...prev, aiMessage]);
+
+        try {
+            const response = await fetch("/api/petchat/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    message: userMessage.content,
+                    imageUrl: imageUrl,      // For saving to DB
+                    imageData: imageData,    // For Gemini analysis
+                    conversationId,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                setMessages((prev) => [...prev, {
+                    role: "assistant",
+                    content: data.response,
+                }]);
+            } else {
+                throw new Error(data.error || "Failed to get response");
+            }
+        } catch (error) {
+            console.error("Chat error:", error);
+            toast.error("Failed to send message. Please try again.");
+        } finally {
             setIsTyping(false);
-        }, 1500);
+        }
     };
 
     const handleKeyPress = (e) => {
@@ -60,6 +133,36 @@ export default function ChatInterface() {
             handleSend();
         }
     };
+
+    const handleVoiceTranscript = (transcript) => {
+        setInput(transcript);
+    };
+
+    const handleImageSelect = (url, preview) => {
+        setCurrentImageUrl(url);
+        setCurrentImagePreview(preview);
+        toast.success("Image uploaded successfully");
+    };
+
+    const handleImageRemove = () => {
+        setCurrentImageUrl(null);
+        setCurrentImagePreview(null);
+    };
+
+    if (isLoading) {
+        return (
+            <div className="max-w-5xl mx-auto">
+                <Card className="bg-gradient-to-br from-emerald-950/40 to-teal-950/40 backdrop-blur-xl border-emerald-500/20 shadow-2xl shadow-emerald-500/10 overflow-hidden p-8">
+                    <div className="flex items-center justify-center h-[500px]">
+                        <div className="text-center space-y-4">
+                            <Loader2 className="h-8 w-8 animate-spin text-emerald-400 mx-auto" />
+                            <p className="text-muted-foreground">Loading conversation...</p>
+                        </div>
+                    </div>
+                </Card>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-5xl mx-auto">
@@ -88,7 +191,7 @@ export default function ChatInterface() {
                 {/* Messages */}
                 <div className="h-[500px] overflow-y-auto p-6 space-y-4 scroll-smooth">
                     <AnimatePresence mode="popLayout">
-                        {messages.map((msg, idx) => (
+                        {messages.filter(msg => msg && msg.role && msg.content).map((msg, idx) => (
                             <motion.div
                                 key={idx}
                                 initial={{ opacity: 0, y: 20, scale: 0.95 }}
@@ -120,7 +223,19 @@ export default function ChatInterface() {
                                             : "bg-gradient-to-br from-emerald-900/40 to-teal-900/40 border border-emerald-500/30"
                                             }`}
                                     >
+                                        {msg.hasImage && msg.imageUrl && (
+                                            <div className="mb-2">
+                                                <Image
+                                                    src={msg.imageUrl}
+                                                    alt="Uploaded image"
+                                                    width={200}
+                                                    height={200}
+                                                    className="rounded-lg object-cover"
+                                                />
+                                            </div>
+                                        )}
                                         <p className="text-sm leading-relaxed">{msg.content}</p>
+                                        {msg.role === "assistant" && <AppointmentSuggestion aiResponse={msg.content} />}
                                         {isClient && (
                                             <p className="text-xs text-muted-foreground mt-2">
                                                 {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
@@ -155,7 +270,15 @@ export default function ChatInterface() {
 
                 {/* Input */}
                 <div className="border-t border-emerald-500/20 bg-gradient-to-r from-emerald-900/30 to-teal-900/30 p-4">
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 items-end">
+                        <div className="flex gap-2">
+                            <VoiceInput onTranscript={handleVoiceTranscript} disabled={isTyping} />
+                            <ImageUpload
+                                onImageSelect={handleImageSelect}
+                                onImageRemove={handleImageRemove}
+                                disabled={isTyping}
+                            />
+                        </div>
                         <div className="flex-1 relative">
                             <Input
                                 value={input}
@@ -163,13 +286,13 @@ export default function ChatInterface() {
                                 onKeyPress={handleKeyPress}
                                 placeholder="Describe your pet's symptoms or ask about medication..."
                                 className="bg-background/50 border-emerald-500/30 focus:border-emerald-500/50 pr-14 h-12 rounded-xl"
-                                disabled={isTyping}
+                                disabled={isTyping || isLoading}
                             />
                             <Sparkles className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-emerald-400/50" />
                         </div>
                         <Button
                             onClick={handleSend}
-                            disabled={!input.trim() || isTyping}
+                            disabled={!input.trim() || isTyping || isLoading}
                             className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 h-12 px-6 rounded-xl shadow-lg shadow-emerald-500/20 transition-all"
                         >
                             {isTyping ? <Loader2 className="h-5 w-5 animate-spin" /> : <><Send className="h-5 w-5 mr-2" />Send</>}

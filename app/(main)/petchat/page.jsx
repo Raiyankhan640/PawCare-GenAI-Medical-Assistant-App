@@ -1,6 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import Script from "next/script";
 import ChatInterface from "./components/chat-interface";
+import LocationBookmark from "./components/location-bookmark";
 import { Sparkles, Shield, Stethoscope, AlertCircle } from "lucide-react";
 
 export default async function PetChatPage() {
@@ -11,7 +13,12 @@ export default async function PetChatPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-background via-emerald-950/5 to-background relative overflow-hidden">
+        <>
+            <Script
+                src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDdQXgoFRxsNcZYVsY7MK069zDse8U_6k0&libraries=places&loading=async"
+                strategy="beforeInteractive"
+            />
+            <div className="min-h-screen bg-gradient-to-br from-background via-emerald-950/5 to-background relative overflow-hidden">
             {/* Animated Background Effects */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
@@ -39,9 +46,12 @@ export default async function PetChatPage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                            <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                            <span className="text-sm font-medium text-emerald-400">Online</span>
+                        <div className="flex items-center gap-3">
+                            <LocationBookmark />
+                            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+                                <span className="text-sm font-medium text-emerald-400">Online</span>
+                            </div>
                         </div>
                     </div>
 
@@ -123,5 +133,6 @@ export default async function PetChatPage() {
                 <ChatInterface />
             </div>
         </div>
+        </>
     );
 }
