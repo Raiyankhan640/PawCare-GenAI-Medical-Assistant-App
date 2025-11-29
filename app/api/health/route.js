@@ -13,6 +13,11 @@ import { db } from "@/lib/prisma";
  * 
  * GET /api/health
  */
+
+// Disable caching for health checks - they should always be fresh
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET() {
   const startTime = Date.now();
   
