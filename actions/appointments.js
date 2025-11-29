@@ -310,6 +310,7 @@ export async function generateVideoToken(formData) {
 
 /**
  * Get doctor by ID
+ * Optimized: Only fetches fields needed for doctor profile
  */
 export async function getDoctorById(doctorId) {
   try {
@@ -318,6 +319,16 @@ export async function getDoctorById(doctorId) {
         id: doctorId,
         role: "DOCTOR",
         verificationStatus: "VERIFIED",
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        specialty: true,
+        imageUrl: true,
+        experience: true,
+        description: true,
+        credentials: true,
       },
     });
     if (!doctor) throw new Error("Doctor not found");

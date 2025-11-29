@@ -151,7 +151,14 @@ export async function getDoctorAppointments() {
         },
       },
       include: {
-        patient: true,
+        patient: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            imageUrl: true,
+          },
+        },
       },
       orderBy: {
         startTime: "asc",
