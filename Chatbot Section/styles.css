@@ -1,0 +1,491 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f5f7fa;
+  min-height: 100vh;
+  display: flex;
+}
+
+/* Layout */
+.app-layout {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+}
+
+/* ===== Sidebar ===== */
+.sidebar {
+  width: 260px;
+  background: #1e1e2f;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  box-sizing: border-box;
+}
+
+.sidebar h2 {
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.chat-list {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 15px;
+}
+
+/* Resize images inside chat bubbles */
+.bubble img {
+    max-width: 180px;
+    max-height: 180px;
+    border-radius: 10px;
+    object-fit: cover;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.chat-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.chat-btn {
+  flex: 1;
+  background: #2c2c3e;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.chat-btn:hover {
+  background: #3b3b54;
+}
+
+.chat-btn.active {
+  background: #444466;
+}
+
+.delete-btn {
+  margin-left: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.delete-btn:hover {
+  opacity: 1;
+  color: #ff5555;
+}
+
+.new-chat-btn, .bookmarks-btn {
+  padding: 10px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.3s ease;
+  margin-bottom: 8px;
+}
+
+.new-chat-btn:hover, .bookmarks-btn:hover {
+  background: #5a6fd8;
+}
+
+.bookmarks-btn {
+  background: #764ba2;
+}
+
+.bookmarks-btn:hover {
+  background: #673d8f;
+}
+
+/* ===== Main Chat Area ===== */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+header {
+  text-align: center;
+  color: #333;
+  padding: 20px;
+  border-bottom: 1px solid #ddd;
+}
+
+header h1 {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+header p {
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+/* Chat container */
+.chat-container {
+  background: white;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Messages */
+.chat-messages {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  scrollbar-width: thin;
+}
+
+.chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 4px;
+}
+
+.message {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  animation: fadeIn 0.3s ease-in;
+}
+
+/* Bot left, user right */
+.bot-message {
+  flex-direction: row;
+}
+
+.user-message {
+  flex-direction: row-reverse;
+}
+
+/* Avatars */
+.avatar {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Bubbles */
+.bubble {
+  padding: 12px 16px;
+  border-radius: 18px;
+  line-height: 1.5;
+  max-width: 70%;
+  word-wrap: break-word;
+}
+
+.user-message .bubble {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-radius: 18px 18px 4px 18px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.bot-message .bubble {
+  background: #f4f6fb;
+  color: #333;
+  border-radius: 18px 18px 18px 4px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* Special bubble styles for clinics and bookmarks */
+.clinics-bubble, .bookmarks-bubble {
+  max-width: 90% !important;
+  padding: 20px !important;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Clinic Cards ===== */
+.clinics-container, .bookmarks-container {
+  width: 100%;
+}
+
+.clinic-card, .bookmark-card {
+  background: white;
+  border: 2px solid #e0e4f0;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.clinic-card:hover, .bookmark-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+.clinic-header, .bookmark-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.clinic-header h4, .bookmark-header h4 {
+  margin: 0;
+  color: #333;
+  font-size: 1.1rem;
+  flex: 1;
+}
+
+.clinic-card p, .bookmark-card p {
+  margin: 8px 0;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.clinic-card a, .bookmark-card a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.clinic-card a:hover, .bookmark-card a:hover {
+  text-decoration: underline;
+}
+
+.hours-section {
+  margin-top: 12px;
+  padding: 10px;
+  background: #f8f9fc;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.hours-section strong {
+  color: #333;
+  display: block;
+  margin-bottom: 6px;
+}
+
+/* ===== Bookmark Button ===== */
+.bookmark-btn {
+  background: transparent;
+  border: 2px solid #667eea;
+  color: #667eea;
+  font-size: 1.3rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bookmark-btn:hover {
+  background: #667eea;
+  color: white;
+  transform: scale(1.1);
+}
+
+.bookmark-btn.bookmarked {
+  background: #ffd700;
+  border-color: #ffd700;
+  color: white;
+}
+
+.bookmark-btn.bookmarked:hover {
+  background: #ffed4e;
+  border-color: #ffed4e;
+  transform: scale(1.1);
+}
+
+/* ===== Remove Bookmark Button ===== */
+.remove-bookmark-btn {
+  background: transparent;
+  border: 2px solid #ff5555;
+  color: #ff5555;
+  font-size: 1rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.remove-bookmark-btn:hover {
+  background: #ff5555;
+  color: white;
+  transform: scale(1.1);
+}
+
+/* Input bar */
+.input-container {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  background: white;
+  border-top: 1px solid #eee;
+  gap: 10px;
+}
+
+#userInput {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  background: #f0f2f8;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+#userInput:focus {
+  background: #fff;
+  box-shadow: 0 0 0 2px #667eea50;
+}
+
+/* Buttons */
+.control-button, .send-button {
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.3s;
+}
+
+.control-button:hover, .send-button:hover {
+  background: #5a6fd8;
+  transform: scale(1.1);
+}
+
+.control-button.recording {
+  background: #ff4444;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Image preview */
+.image-preview-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 0;
+}
+
+.image-preview-container img {
+  max-width: 120px;
+  max-height: 120px;
+  border-radius: 10px;
+  border: 2px solid #ddd;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.image-preview-container .remove-preview {
+  font-size: 20px;
+  color: #ff4444;
+  cursor: pointer;
+  margin-left: -8px;
+  font-weight: bold;
+}
+
+/* Typing indicator */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  background: #f4f6fb;
+  border-radius: 18px 18px 18px 4px;
+  padding: 8px 12px;
+  width: fit-content;
+  gap: 4px;
+}
+
+.typing-indicator span {
+  width: 8px;
+  height: 8px;
+  background: #999;
+  border-radius: 50%;
+  animation: bounce 1.3s infinite;
+}
+
+.typing-indicator span:nth-child(2) { animation-delay: 0.15s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-5px); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 200px;
+  }
+  
+  .clinic-card, .bookmark-card {
+    padding: 12px;
+  }
+  
+  .bubble {
+    max-width: 85%;
+  }
+  
+  .clinics-bubble, .bookmarks-bubble {
+    max-width: 95% !important;
+    padding: 15px !important;
+  }
+}
