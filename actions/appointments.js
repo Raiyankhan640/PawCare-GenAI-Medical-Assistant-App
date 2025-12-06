@@ -256,6 +256,14 @@ export async function generateVideoToken(formData) {
       throw new Error("This appointment is not currently scheduled");
     }
 
+    // Check if video calling is properly configured
+    if (!appointment.videoSessionId) {
+      return {
+        success: false,
+        error: "Video calling is not available for this appointment. Please contact support.",
+      };
+    }
+
     // Allow joining the call anytime for testing purposes
     // In production, you can add time restrictions if needed
     const now = new Date();
@@ -281,11 +289,20 @@ export async function generateVideoToken(formData) {
     });
 
     // Generate the token with appropriate role and expiration
-    const token = vonage.video.generateClientToken(appointment.videoSessionId, {
-      role: "publisher", // Both doctor and patient can publish streams
-      expireTime: expirationTime,
-      data: connectionData,
-    });
+    let token;
+    try {
+      token = vonage.video.generateClientToken(appointment.videoSessionId, {
+        role: "publisher", // Both doctor and patient can publish streams
+        expireTime: expirationTime,
+        data: connectionData,
+      });
+    } catch (videoError) {
+      console.error("Vonage token generation failed:", videoError);
+      return {
+        success: false,
+        error: "Video calling service is currently unavailable. Please try again later or contact support.",
+      };
+    }
 
     // Update the appointment with the token
     await db.appointment.update({
@@ -304,7 +321,10 @@ export async function generateVideoToken(formData) {
     };
   } catch (error) {
     console.error("Failed to generate video token:", error);
-    throw new Error("Failed to generate video token:" + error.message);
+    return {
+      success: false,
+      error: error.message || "Failed to generate video token. Please try again.",
+    };
   }
 }
 
