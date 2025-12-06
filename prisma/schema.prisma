@@ -36,6 +36,8 @@ model User {
   availabilities      Availability[]
   transactions        CreditTransaction[]
   payouts             Payout[]
+  chatConversations   ChatConversation[]
+  bookmarkedLocations BookmarkedLocation[]
 }
 
 enum UserRole {
@@ -135,4 +137,53 @@ model Payout {
 enum PayoutStatus {
   PROCESSING
   PROCESSED
+}
+
+// PetChat Models
+model ChatConversation {
+  id        String        @id @default(uuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String?       // Auto-generated from first message
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  messages  ChatMessage[]
+
+  @@index([userId, updatedAt])
+}
+
+model ChatMessage {
+  id              String           @id @default(uuid())
+  conversationId  String
+  conversation    ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role            MessageRole
+  content         String           @db.Text
+  imageUrl        String?
+  hasImage        Boolean          @default(false)
+  metadata        Json?            // Store voice input flag, etc.
+  createdAt       DateTime         @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+}
+
+model BookmarkedLocation {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String   // Clinic name
+  address   String   @db.Text
+  phone     String?
+  website   String?
+  notes     String?  @db.Text
+  latitude  Float?
+  longitude Float?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, createdAt])
 }
