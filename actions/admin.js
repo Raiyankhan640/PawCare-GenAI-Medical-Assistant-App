@@ -2,7 +2,8 @@
 
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache";
 
 /**
  * Verifies if current user has admin role
@@ -101,7 +102,12 @@ export async function updateDoctorStatus(formData) {
       },
     });
 
+    // Invalidate doctor caches when status changes
+    revalidateTag(CACHE_TAGS.DOCTORS);
+    revalidateTag(CACHE_TAGS.DOCTORS_BY_SPECIALTY);
+    revalidateTag(CACHE_TAGS.DOCTOR_PROFILE);
     revalidatePath("/admin");
+    revalidatePath("/doctors");
     return { success: true };
   } catch (error) {
     console.error("Failed to update doctor status:", error);

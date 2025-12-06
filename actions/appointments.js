@@ -310,27 +310,13 @@ export async function generateVideoToken(formData) {
 
 /**
  * Get doctor by ID
- * Optimized: Only fetches fields needed for doctor profile
+ * Optimized: Uses caching for better performance
  */
 export async function getDoctorById(doctorId) {
   try {
-    const doctor = await db.user.findFirst({
-      where: {
-        id: doctorId,
-        role: "DOCTOR",
-        verificationStatus: "VERIFIED",
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        specialty: true,
-        imageUrl: true,
-        experience: true,
-        description: true,
-        credentials: true,
-      },
-    });
+    // Import cached function dynamically to avoid circular deps
+    const { getCachedDoctorById } = await import("@/lib/cache");
+    const doctor = await getCachedDoctorById(doctorId);
     if (!doctor) throw new Error("Doctor not found");
     return { doctor };
   } catch {
@@ -467,5 +453,63 @@ export async function getAvailableTimeSlots(doctorId) {
   } catch (error) {
     console.error("Failed to fetch available slots:", error);
     throw new Error("Failed to fetch available time slots: " + error.message);
+  }
+}
+
+/**
+ * Delete a cancelled appointment (only CANCELLED status)
+ */
+export async function deleteAppointment(formData) {
+  const { userId } = await auth();
+
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  try {
+    const user = await db.user.findUnique({
+      where: { clerkUserId: userId },
+    });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const appointmentId = formData.get("appointmentId");
+
+    if (!appointmentId) {
+      throw new Error("Appointment ID is required");
+    }
+
+    // Find the appointment
+    const appointment = await db.appointment.findUnique({
+      where: { id: appointmentId },
+    });
+
+    if (!appointment) {
+      throw new Error("Appointment not found");
+    }
+
+    // Verify user is part of this appointment
+    if (appointment.doctorId !== user.id && appointment.patientId !== user.id) {
+      throw new Error("Unauthorized to delete this appointment");
+    }
+
+    // Only allow deleting CANCELLED appointments
+    if (appointment.status !== "CANCELLED") {
+      throw new Error("Only cancelled appointments can be deleted");
+    }
+
+    // Delete the appointment
+    await db.appointment.delete({
+      where: { id: appointmentId },
+    });
+
+    revalidatePath("/appointments");
+    revalidatePath("/doctor");
+    return { success: true, message: "Appointment deleted successfully" };
+  } catch (error) {
+    console.error("Failed to delete appointment:", error);
+    throw new Error("Failed to delete appointment: " + error.message);
   }
 }

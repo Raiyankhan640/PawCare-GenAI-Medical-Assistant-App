@@ -30,7 +30,7 @@ import {
   addAppointmentNotes,
   markAppointmentCompleted,
 } from "@/actions/doctor";
-import { generateVideoToken } from "@/actions/appointments";
+import { generateVideoToken, deleteAppointment } from "@/actions/appointments";
 import useFetch from "@/hooks/use-fetch";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -41,7 +41,7 @@ export function AppointmentCard({
   refetchAppointments,
 }) {
   const [open, setOpen] = useState(false);
-  const [action, setAction] = useState(null); // 'cancel', 'notes', 'video', or 'complete'
+  const [action, setAction] = useState(null); // 'cancel', 'notes', 'video', 'complete', or 'delete'
   const [notes, setNotes] = useState(appointment.notes || "");
   const router = useRouter();
 
@@ -66,6 +66,11 @@ export function AppointmentCard({
     fn: submitMarkCompleted,
     data: completeData,
   } = useFetch(markAppointmentCompleted);
+  const {
+    loading: deleteLoading,
+    fn: submitDelete,
+    data: deleteData,
+  } = useFetch(deleteAppointment);
 
   // Format date and time
   const formatDateTime = (dateString) => {
@@ -157,6 +162,15 @@ export function AppointmentCard({
     await submitTokenRequest(formData);
   };
 
+  // Handle delete appointment (only for cancelled appointments)
+  const handleDeleteAppointment = async () => {
+    if (deleteLoading) return;
+
+    const formData = new FormData();
+    formData.append("appointmentId", appointment.id);
+    await submitDelete(formData);
+  };
+
   // Handle successful operations
   useEffect(() => {
     if (cancelData?.success) {
@@ -193,6 +207,18 @@ export function AppointmentCard({
       }
     }
   }, [notesData, refetchAppointments, router]);
+
+  useEffect(() => {
+    if (deleteData?.success) {
+      toast.success("Appointment deleted successfully");
+      setOpen(false);
+      if (refetchAppointments) {
+        refetchAppointments();
+      } else {
+        router.refresh();
+      }
+    }
+  }, [deleteData, refetchAppointments, router]);
 
   useEffect(() => {
     if (tokenData?.success) {
@@ -564,6 +590,19 @@ export function AppointmentCard({
                   )}
                 </Button>
               )}
+
+              {/* Delete Button - For cancelled appointments */}
+              {appointment.status === "CANCELLED" && (
+                <Button
+                  variant="outline"
+                  onClick={() => setAction("delete")}
+                  disabled={deleteLoading}
+                  className="border-red-900/30 text-red-400 hover:bg-red-900/10 mt-3 sm:mt-0"
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Delete Appointment
+                </Button>
+              )}
             </div>
 
             <Button
@@ -571,6 +610,45 @@ export function AppointmentCard({
               className="bg-emerald-600 hover:bg-emerald-700"
             >
               Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={action === "delete"} onOpenChange={(open) => !open && setAction(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Cancelled Appointment?</DialogTitle>
+            <DialogDescription>
+              This will permanently remove this cancelled appointment from your records. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setAction(null)}
+              disabled={deleteLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteAppointment}
+              disabled={deleteLoading}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {deleteLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <X className="mr-2 h-4 w-4" />
+                  Delete Permanently
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

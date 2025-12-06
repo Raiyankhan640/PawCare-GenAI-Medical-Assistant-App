@@ -1,32 +1,16 @@
 "use server";
 
 import { db } from "@/lib/prisma";
+import { getCachedDoctorsBySpecialty } from "@/lib/cache";
 
 /**
  * Get doctors by specialty
- * Optimized: Only fetches fields needed for listing cards
+ * Optimized: Uses caching for better performance
  */
 export async function getDoctorsBySpecialty(specialty) {
   try {
-    const doctors = await db.user.findMany({
-      where: {
-        role: "DOCTOR",
-        verificationStatus: "VERIFIED",
-        specialty: specialty.split("%20").join(" "),
-      },
-      select: {
-        id: true,
-        name: true,
-        specialty: true,
-        imageUrl: true,
-        experience: true,
-        description: true,
-      },
-      orderBy: {
-        name: "asc",
-      },
-    });
-
+    // Use cached query - revalidates every 5 minutes
+    const doctors = await getCachedDoctorsBySpecialty(specialty);
     return { doctors };
   } catch (error) {
     console.error("Failed to fetch doctors by specialty:", error);

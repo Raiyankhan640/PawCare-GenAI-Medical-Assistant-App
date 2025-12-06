@@ -1,10 +1,9 @@
-import { db } from "@/lib/prisma";
+import { getCachedAllDoctors } from "@/lib/cache";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import Image from "next/image";
-import { Star, MapPin, Clock } from "lucide-react";
+import { Star, Clock } from "lucide-react";
 
 export const metadata = {
   title: "All Veterinarians - PawCare",
@@ -12,15 +11,8 @@ export const metadata = {
 };
 
 export default async function AllDoctorsPage() {
-  const doctors = await db.user.findMany({
-    where: {
-      role: "DOCTOR",
-      verificationStatus: "VERIFIED",
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  // Use cached query - revalidates every 5 minutes
+  const doctors = await getCachedAllDoctors();
 
   return (
     <div className="bg-background min-h-screen py-12">

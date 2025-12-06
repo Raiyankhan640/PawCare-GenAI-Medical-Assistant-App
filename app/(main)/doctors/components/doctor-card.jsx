@@ -1,66 +1,103 @@
 "use client";
 
+import { memo, useMemo } from "react";
 import { User, Star, Calendar, MapPin, Award, Clock, Stethoscope } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { useState } from "react";
 
-export function DoctorCard({ doctor, index = 0 }) {
-  const [isHovered, setIsHovered] = useState(false);
+// Static stats data - moved outside component to prevent recreation
+const STATS_DATA = [
+  { label: "Consultations", value: "250+", icon: "calendar" },
+  { label: "Rating", value: "4.9", icon: "star" },
+  { label: "Response", value: "< 1hr", icon: "clock" }
+];
+
+// Icon map to avoid conditional rendering in JSX
+const StatIcon = memo(function StatIcon({ type }) {
+  switch (type) {
+    case "calendar": return <Calendar className="h-3 w-3" />;
+    case "star": return <Star className="h-3 w-3" />;
+    case "clock": return <Clock className="h-3 w-3" />;
+    default: return null;
+  }
+});
+
+// Stats item component - memoized
+const StatItem = memo(function StatItem({ stat }) {
+  return (
+    <div className="text-center p-2 bg-card/50 rounded-lg border border-emerald-900/20">
+      <div className="flex items-center justify-center gap-1 text-emerald-400 mb-1">
+        <StatIcon type={stat.icon} />
+        <span className="text-xs font-bold">{stat.value}</span>
+      </div>
+      <div className="text-[10px] text-muted-foreground">{stat.label}</div>
+    </div>
+  );
+});
+
+// Doctor avatar component - memoized
+const DoctorAvatar = memo(function DoctorAvatar({ imageUrl, name }) {
+  return (
+    <div className="relative">
+      <div className="absolute inset-0 bg-linear-to-br from-emerald-500/30 to-teal-500/30 rounded-full blur-md group-hover:blur-lg transition-all" />
+      <div className="relative w-20 h-20 rounded-full bg-linear-to-br from-emerald-900/40 to-teal-900/40 flex items-center justify-center ring-2 ring-emerald-500/30 group-hover:ring-emerald-400/50 transition-all">
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={name}
+            className="w-20 h-20 rounded-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <User className="h-10 w-10 text-emerald-400" />
+        )}
+        {/* Online indicator - CSS animation instead of framer-motion */}
+        <div className="absolute bottom-1 right-1 w-4 h-4 bg-emerald-400 rounded-full border-2 border-card shadow-lg animate-pulse" />
+      </div>
+    </div>
+  );
+});
+
+// Main DoctorCard component - memoized with custom comparison
+export const DoctorCard = memo(function DoctorCard({ doctor, index = 0 }) {
+  // Memoize computed values
+  const doctorDescription = useMemo(() => 
+    doctor.description || "Experienced veterinarian dedicated to providing exceptional care for your beloved pets with compassion and expertise.",
+    [doctor.description]
+  );
+
+  const profileLink = useMemo(() => 
+    `/doctors/${doctor.specialty}/${doctor.id}`,
+    [doctor.specialty, doctor.id]
+  );
+
+  // CSS animation delay based on index
+  const animationStyle = useMemo(() => ({
+    animationDelay: `${index * 100}ms`,
+  }), [index]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 50 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ 
-        duration: 0.5, 
-        delay: index * 0.1,
-        ease: "easeOut"
-      }}
-      whileHover={{ y: -8 }}
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
+    <div 
+      className="animate-fade-in-up hover:-translate-y-2 transition-transform duration-300"
+      style={animationStyle}
     >
-      <Card className="border-emerald-900/20 hover:border-emerald-600/50 transition-all duration-300 overflow-hidden group relative bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-xl shadow-lg hover:shadow-2xl hover:shadow-emerald-500/20">
-        {/* Animated gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 to-teal-500/0 group-hover:from-emerald-500/5 group-hover:to-teal-500/5 transition-all duration-500"></div>
+      <Card className="border-emerald-900/20 hover:border-emerald-600/50 transition-all duration-300 overflow-hidden group relative bg-linear-to-br from-card/80 to-card/40 backdrop-blur-xl shadow-lg hover:shadow-2xl hover:shadow-emerald-500/20">
+        {/* Gradient overlay - CSS only */}
+        <div className="absolute inset-0 bg-linear-to-br from-emerald-500/0 to-teal-500/0 group-hover:from-emerald-500/5 group-hover:to-teal-500/5 transition-all duration-500" />
         
-        {/* Shimmer effect */}
+        {/* Shimmer effect - CSS only */}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+          <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
         </div>
 
         <CardContent className="p-6 relative z-10">
           <div className="flex items-start gap-4 mb-4">
-            {/* Doctor Image with animated ring */}
-            <motion.div 
-              className="relative"
-              animate={isHovered ? { scale: 1.1 } : { scale: 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/30 to-teal-500/30 rounded-full blur-md group-hover:blur-lg transition-all"></div>
-              <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-emerald-900/40 to-teal-900/40 flex items-center justify-center ring-2 ring-emerald-500/30 group-hover:ring-emerald-400/50 transition-all">
-                {doctor.imageUrl ? (
-                  <img
-                    src={doctor.imageUrl}
-                    alt={doctor.name}
-                    className="w-20 h-20 rounded-full object-cover"
-                  />
-                ) : (
-                  <User className="h-10 w-10 text-emerald-400" />
-                )}
-                
-                {/* Online indicator */}
-                <motion.div
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="absolute bottom-1 right-1 w-4 h-4 bg-emerald-400 rounded-full border-2 border-card shadow-lg"
-                />
-              </div>
-            </motion.div>
+            {/* Doctor Avatar - CSS hover scale */}
+            <div className="group-hover:scale-110 transition-transform duration-300">
+              <DoctorAvatar imageUrl={doctor.imageUrl} name={doctor.name} />
+            </div>
 
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-2 mb-2">
@@ -68,25 +105,20 @@ export function DoctorCard({ doctor, index = 0 }) {
                   Dr. {doctor.name}
                 </h3>
                 
-                <motion.div
-                  whileHover={{ rotate: 360 }}
-                  transition={{ duration: 0.5 }}
+                <Badge
+                  variant="outline"
+                  className="bg-emerald-900/30 border-emerald-600/40 text-emerald-400 shrink-0 shadow-lg group-hover:rotate-3 transition-transform"
                 >
-                  <Badge
-                    variant="outline"
-                    className="bg-emerald-900/30 border-emerald-600/40 text-emerald-400 shrink-0 shadow-lg"
-                  >
-                    <Star className="h-3 w-3 mr-1 fill-emerald-400" />
-                    Verified
-                  </Badge>
-                </motion.div>
+                  <Star className="h-3 w-3 mr-1 fill-emerald-400" />
+                  Verified
+                </Badge>
               </div>
 
               {/* Specialty Badge */}
               <div className="flex items-center gap-2 mb-2">
                 <Badge 
                   variant="outline" 
-                  className="bg-gradient-to-r from-emerald-950/40 to-teal-950/40 border-emerald-700/30 text-emerald-300 text-xs"
+                  className="bg-linear-to-r from-emerald-950/40 to-teal-950/40 border-emerald-700/30 text-emerald-300 text-xs"
                 >
                   <Stethoscope className="h-3 w-3 mr-1" />
                   {doctor.specialty}
@@ -110,30 +142,14 @@ export function DoctorCard({ doctor, index = 0 }) {
           {/* Description */}
           <div className="mb-4 p-3 bg-emerald-950/20 rounded-lg border border-emerald-900/20 group-hover:border-emerald-800/40 transition-all">
             <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-              {doctor.description || "Experienced veterinarian dedicated to providing exceptional care for your beloved pets with compassion and expertise."}
+              {doctorDescription}
             </p>
           </div>
 
-          {/* Stats Row */}
+          {/* Stats Row - Using memoized components */}
           <div className="grid grid-cols-3 gap-2 mb-4">
-            {[
-              { label: "Consultations", value: "250+", icon: <Calendar className="h-3 w-3" /> },
-              { label: "Rating", value: "4.9", icon: <Star className="h-3 w-3" /> },
-              { label: "Response", value: "< 1hr", icon: <Clock className="h-3 w-3" /> }
-            ].map((stat, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.3 + idx * 0.1 }}
-                className="text-center p-2 bg-card/50 rounded-lg border border-emerald-900/20"
-              >
-                <div className="flex items-center justify-center gap-1 text-emerald-400 mb-1">
-                  {stat.icon}
-                  <span className="text-xs font-bold">{stat.value}</span>
-                </div>
-                <div className="text-[10px] text-muted-foreground">{stat.label}</div>
-              </motion.div>
+            {STATS_DATA.map((stat, idx) => (
+              <StatItem key={idx} stat={stat} />
             ))}
           </div>
 
@@ -148,25 +164,15 @@ export function DoctorCard({ doctor, index = 0 }) {
           {/* Action Button */}
           <Button
             asChild
-            className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/30 group-hover:shadow-xl group-hover:shadow-emerald-500/40 transition-all relative overflow-hidden"
+            className="w-full bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/30 group-hover:shadow-xl group-hover:shadow-emerald-500/40 transition-all relative overflow-hidden"
           >
-            <Link href={`/doctors/${doctor.specialty}/${doctor.id}`}>
-              <motion.span 
-                className="relative z-10 flex items-center justify-center gap-2"
-                animate={isHovered ? { x: [0, 5, 0] } : {}}
-                transition={{ duration: 0.3 }}
-              >
+            <Link href={profileLink}>
+              <span className="relative z-10 flex items-center justify-center gap-2 group-hover:translate-x-1 transition-transform">
                 <Calendar className="h-4 w-4" />
                 View Profile & Book Appointment
-              </motion.span>
-              
-              {/* Button shimmer effect */}
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                initial={{ x: "-100%" }}
-                animate={isHovered ? { x: "100%" } : { x: "-100%" }}
-                transition={{ duration: 0.6 }}
-              />
+              </span>
+              {/* Button shimmer - CSS animation */}
+              <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-600" />
             </Link>
           </Button>
 
@@ -182,8 +188,20 @@ export function DoctorCard({ doctor, index = 0 }) {
         </CardContent>
 
         {/* Corner decoration */}
-        <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div className="absolute top-0 right-0 w-20 h-20 bg-linear-to-bl from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
       </Card>
-    </motion.div>
+    </div>
   );
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison - only re-render if doctor data changed
+  return (
+    prevProps.doctor.id === nextProps.doctor.id &&
+    prevProps.doctor.name === nextProps.doctor.name &&
+    prevProps.doctor.specialty === nextProps.doctor.specialty &&
+    prevProps.doctor.experience === nextProps.doctor.experience &&
+    prevProps.doctor.imageUrl === nextProps.doctor.imageUrl &&
+    prevProps.doctor.location === nextProps.doctor.location &&
+    prevProps.doctor.description === nextProps.doctor.description &&
+    prevProps.index === nextProps.index
+  );
+});
