@@ -61,7 +61,7 @@ export async function setUserRole(formData, clerkUserId = null) {
 
     // For patient role - simple update
     if (role === "PATIENT") {
-      await db.user.update({
+      const updatedUser = await db.user.update({
         where: {
           clerkUserId: userId,
         },
@@ -70,8 +70,9 @@ export async function setUserRole(formData, clerkUserId = null) {
         },
       });
 
+      console.log("[Onboarding] Patient created:", updatedUser.id);
       revalidatePath("/");
-      return { success: true, redirect: "/doctors" };
+      return { success: true, redirect: "/doctors", role: "PATIENT" };
     }
 
     // For doctor role - need additional information
@@ -81,12 +82,15 @@ export async function setUserRole(formData, clerkUserId = null) {
       const credentialUrl = formData.get("credentialUrl");
       const description = formData.get("description");
 
+      console.log("[Onboarding] Doctor data:", { specialty, experience, credentialUrl, description });
+
       // Validate inputs
-      if (!specialty || !experience || !credentialUrl || !description) {
-        throw new Error("All fields are required");
+      if (!specialty || isNaN(experience) || !credentialUrl || !description) {
+        console.error("[Onboarding] Validation failed:", { specialty, experience, credentialUrl, description });
+        throw new Error("All fields are required for doctor registration");
       }
 
-      await db.user.update({
+      const updatedUser = await db.user.update({
         where: {
           clerkUserId: userId,
         },
@@ -100,11 +104,12 @@ export async function setUserRole(formData, clerkUserId = null) {
         },
       });
 
+      console.log("[Onboarding] Doctor created:", updatedUser.id, "Status:", updatedUser.verificationStatus);
       revalidatePath("/");
-      return { success: true, redirect: "/doctor/verification" };
+      return { success: true, redirect: "/doctor/verification", role: "DOCTOR" };
     }
   } catch (error) {
-    console.error("Database operation failed:", error);
+    console.error("[Onboarding] Database operation failed:", error);
 
     // More specific error messages
     if (error.message.includes("Can't reach database server") ||

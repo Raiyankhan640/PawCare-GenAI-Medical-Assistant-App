@@ -3,6 +3,13 @@ import { headers } from "next/headers";
 import { WebhookEvent } from "@clerk/nextjs/server";
 import { db } from "@/lib/prisma";
 
+// Credit allocations per plan
+const PLAN_CREDITS = {
+  free_user: 2,
+  standard: 10,
+  premium: 24,
+};
+
 export async function POST(req) {
   // You can find this in the Clerk Dashboard -> Webhooks -> choose the webhook
   const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
@@ -84,6 +91,109 @@ export async function POST(req) {
       return new Response(`Error ${eventType === "user.created" ? "creating" : "updating"} user`, {
         status: 400,
       });
+    }
+  }
+
+  // Handle subscription created/updated events (Clerk billing)
+  if (eventType === "user.subscription.created" || eventType === "user.subscription.updated") {
+    try {
+      const { user_id, plan_id, status } = evt.data;
+      
+      console.log(`[Webhook] Subscription event for user ${user_id}, plan: ${plan_id}, status: ${status}`);
+
+      // Only process active subscriptions
+      if (status !== "active") {
+        console.log(`[Webhook] Skipping non-active subscription status: ${status}`);
+        return new Response("", { status: 200 });
+      }
+
+      // Find the user in our database
+      const user = await db.user.findUnique({
+        where: { clerkUserId: user_id },
+      });
+
+      if (!user) {
+        console.error(`[Webhook] User not found for clerkUserId: ${user_id}`);
+        return new Response("User not found", { status: 404 });
+      }
+
+      // Determine credits to allocate based on plan
+      const creditsToAdd = PLAN_CREDITS[plan_id] || 0;
+
+      if (creditsToAdd > 0) {
+        // Create transaction and update credits
+        await db.$transaction(async (tx) => {
+          // Create credit transaction record
+          await tx.creditTransaction.create({
+            data: {
+              userId: user.id,
+              amount: creditsToAdd,
+              type: "CREDIT_PURCHASE",
+              packageId: plan_id,
+            },
+          });
+
+          // Update user's credit balance
+          await tx.user.update({
+            where: { id: user.id },
+            data: {
+              credits: { increment: creditsToAdd },
+            },
+          });
+        });
+
+        console.log(`[Webhook] Added ${creditsToAdd} credits to user ${user.id} for plan ${plan_id}`);
+      }
+    } catch (error) {
+      console.error("[Webhook] Error processing subscription:", error);
+      return new Response("Error processing subscription", { status: 500 });
+    }
+  }
+
+  // Handle checkout session completed (for one-time purchases)
+  if (eventType === "checkout.session.completed") {
+    try {
+      const { user_id, line_items, amount_total } = evt.data;
+      
+      console.log(`[Webhook] Checkout completed for user ${user_id}, amount: ${amount_total}`);
+
+      const user = await db.user.findUnique({
+        where: { clerkUserId: user_id },
+      });
+
+      if (!user) {
+        console.error(`[Webhook] User not found for clerkUserId: ${user_id}`);
+        return new Response("User not found", { status: 404 });
+      }
+
+      // Calculate credits based on amount (if using direct checkout)
+      // Assuming $1 = 1 credit for simplicity, adjust as needed
+      const creditsToAdd = Math.floor((amount_total || 0) / 100);
+
+      if (creditsToAdd > 0) {
+        await db.$transaction(async (tx) => {
+          await tx.creditTransaction.create({
+            data: {
+              userId: user.id,
+              amount: creditsToAdd,
+              type: "CREDIT_PURCHASE",
+              packageId: "checkout",
+            },
+          });
+
+          await tx.user.update({
+            where: { id: user.id },
+            data: {
+              credits: { increment: creditsToAdd },
+            },
+          });
+        });
+
+        console.log(`[Webhook] Added ${creditsToAdd} credits to user ${user.id} from checkout`);
+      }
+    } catch (error) {
+      console.error("[Webhook] Error processing checkout:", error);
+      return new Response("Error processing checkout", { status: 500 });
     }
   }
 

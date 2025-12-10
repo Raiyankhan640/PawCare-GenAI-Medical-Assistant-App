@@ -44,6 +44,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
+import UserManagement from "./components/user-management";
 
 // Chart components
 import {
@@ -838,7 +839,7 @@ export default function AdminDashboardClient() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="doctors" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 bg-slate-800/50 p-1 rounded-xl">
+            <TabsList className="grid w-full grid-cols-4 bg-slate-800/50 p-1 rounded-xl">
               <TabsTrigger
                 value="doctors"
                 className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-lg"
@@ -852,6 +853,13 @@ export default function AdminDashboardClient() {
               >
                 <UserCheck className="h-4 w-4 mr-2" />
                 Pending ({data?.pendingDoctors?.length || 0})
+              </TabsTrigger>
+              <TabsTrigger
+                value="users"
+                className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-lg"
+              >
+                <Users className="h-4 w-4 mr-2" />
+                Users
               </TabsTrigger>
               <TabsTrigger
                 value="payouts"
@@ -924,6 +932,10 @@ export default function AdminDashboardClient() {
                   ))}
                 </div>
               )}
+            </TabsContent>
+
+            <TabsContent value="users" className="mt-6">
+              <UserManagement />
             </TabsContent>
 
             <TabsContent value="payouts" className="mt-6">
