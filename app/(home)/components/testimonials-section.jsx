@@ -30,7 +30,7 @@ const testimonials = [
 
 export const TestimonialsSection = forwardRef(function TestimonialsSection(props, ref) {
   return (
-    <section className="py-12 md:py-16 bg-muted/30" ref={ref}>
+    <section className="py-12 md:py-16 bg-muted/30" ref={ref} suppressHydrationWarning>
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <Badge

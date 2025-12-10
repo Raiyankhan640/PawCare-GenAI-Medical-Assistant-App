@@ -133,7 +133,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="bg-background" ref={pageRef}>
+    <div className="bg-background" ref={pageRef} suppressHydrationWarning>
       <HeroSection />
       <FeaturesSection ref={featuresRef} />
       <PricingSection />

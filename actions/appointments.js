@@ -142,15 +142,24 @@ async function getOrCreatePatientByClerkId(clerkId) {
  * Book a new appointment with a doctor
  */
 export async function bookAppointment(formData) {
-  const { userId } = await auth();
-  if (!userId) throw new Error("Unauthorized");
-
   try {
+    let userId = null;
+    try {
+      const authResult = await auth();
+      userId = authResult?.userId;
+    } catch (authError) {
+      console.error("Auth error in bookAppointment:", authError.message);
+    }
+    
+    if (!userId) {
+      return { success: false, error: "Please sign in to book an appointment" };
+    }
+
     // Ensure we have a patient row for this user
     const patient = await getOrCreatePatientByClerkId(userId);
 
     if (patient.role !== "PATIENT") {
-      throw new Error("Please use a pet owner account to book");
+      return { success: false, error: "Please use a pet owner account to book" };
     }
 
     // Parse form data
@@ -261,7 +270,7 @@ export async function bookAppointment(formData) {
     return { success: true, appointment: appointment };
   } catch (error) {
     console.error("Failed to book appointment:", error);
-    throw new Error("Failed to book appointment:" + error.message);
+    return { success: false, error: error.message || "Failed to book appointment" };
   }
 }
 
@@ -329,10 +338,16 @@ async function createVideoSession() {
  * This will be called when either doctor or patient is about to join the call
  */
 export async function generateVideoToken(formData) {
-  const { userId } = await auth();
+  let userId = null;
+  try {
+    const authResult = await auth();
+    userId = authResult?.userId;
+  } catch (authError) {
+    console.error("Auth error in generateVideoToken:", authError.message);
+  }
 
   if (!userId) {
-    throw new Error("Unauthorized");
+    return { success: false, error: "Please sign in to join the video call" };
   }
 
   try {
@@ -452,10 +467,13 @@ export async function getDoctorById(doctorId) {
     // Import cached function dynamically to avoid circular deps
     const { getCachedDoctorById } = await import("@/lib/cache");
     const doctor = await getCachedDoctorById(doctorId);
-    if (!doctor) throw new Error("Doctor not found");
+    if (!doctor) {
+      return { doctor: null, error: "Doctor not found" };
+    }
     return { doctor };
-  } catch {
-    throw new Error("Failed to fetch doctor details");
+  } catch (error) {
+    console.error("Failed to fetch doctor details:", error);
+    return { doctor: null, error: "Failed to fetch doctor details" };
   }
 }
 
@@ -465,7 +483,7 @@ export async function getDoctorById(doctorId) {
 export async function getAvailableTimeSlots(doctorId) {
   try {
     // Validate doctor existence and verification
-    const doctor = await db.user.findUnique({
+    const doctor = await db.user.findFirst({
       where: {
         id: doctorId,
         role: "DOCTOR",
@@ -474,7 +492,7 @@ export async function getAvailableTimeSlots(doctorId) {
     });
 
     if (!doctor) {
-      throw new Error("Doctor not found or not verified");
+      return { days: [], error: "Doctor not found or not verified" };
     }
 
     // Fetch a single availability record
@@ -587,7 +605,7 @@ export async function getAvailableTimeSlots(doctorId) {
     return { days: result, usedDefaultHours: !availability };
   } catch (error) {
     console.error("Failed to fetch available slots:", error);
-    throw new Error("Failed to fetch available time slots: " + error.message);
+    return { days: [], error: "Failed to fetch available time slots" };
   }
 }
 
@@ -595,10 +613,16 @@ export async function getAvailableTimeSlots(doctorId) {
  * Delete a cancelled appointment (only CANCELLED status)
  */
 export async function deleteAppointment(formData) {
-  const { userId } = await auth();
+  let userId = null;
+  try {
+    const authResult = await auth();
+    userId = authResult?.userId;
+  } catch (authError) {
+    console.error("Auth error in deleteAppointment:", authError.message);
+  }
 
   if (!userId) {
-    throw new Error("Unauthorized");
+    return { success: false, error: "Please sign in to delete appointment" };
   }
 
   try {

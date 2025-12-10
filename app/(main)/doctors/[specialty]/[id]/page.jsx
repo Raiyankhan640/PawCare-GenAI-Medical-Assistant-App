@@ -4,6 +4,7 @@ import { use, useEffect, useState } from "react";
 import { getDoctorById, getAvailableTimeSlots } from "@/actions/appointments";
 import { DoctorProfile } from "./components/doctor-profile";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function DoctorProfilePage({ params }) {
   const router = useRouter();
@@ -24,10 +25,17 @@ export default function DoctorProfilePage({ params }) {
           getAvailableTimeSlots(id),
         ]);
 
+        if (doctorData.error) {
+          toast.error(doctorData.error);
+          router.push("/doctors");
+          return;
+        }
+
         setDoctor(doctorData.doctor);
         setAvailableDays(slotsData.days || []);
       } catch (error) {
         console.error("Error loading doctor profile:", error);
+        toast.error("Failed to load doctor profile");
         router.push("/doctors");
       } finally {
         setLoading(false);

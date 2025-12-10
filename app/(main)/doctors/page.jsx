@@ -52,23 +52,16 @@ export default async function DoctorsPage() {
       {/* View All Doctors Button */}
       <div className="flex justify-center mb-12">
         <Link href="/doctors/all">
-          <div className="group relative">
-            {/* Glow effect background */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 rounded-2xl blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt"></div>
-
-            {/* Button */}
-            <Button className="relative bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-8 md:px-12 py-6 md:py-8 h-auto text-base md:text-xl rounded-2xl shadow-2xl shadow-emerald-500/50 font-bold transition-all duration-300 group-hover:scale-105">
-              <div className="flex items-center gap-3">
-                <Search className="w-5 h-5 md:w-6 md:h-6 group-hover:rotate-12 transition-transform" />
-                <span className="bg-gradient-to-r from-white to-emerald-100 bg-clip-text text-transparent">
-                  View All Doctors & Search
-                </span>
-                <div className="ml-2 px-2 py-1 bg-white/20 rounded-lg text-xs md:text-sm backdrop-blur-sm">
-                  20 Vets
-                </div>
-              </div>
-            </Button>
-          </div>
+          <Button 
+            variant="outline" 
+            className="group border-emerald-600/50 bg-emerald-950/30 hover:bg-emerald-900/50 hover:border-emerald-500/70 text-white px-6 py-2.5 h-auto rounded-xl transition-all duration-300 shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20"
+          >
+            <Search className="w-4 h-4 mr-2 text-emerald-400 group-hover:scale-110 transition-transform" />
+            <span className="font-medium">View All Veterinarians</span>
+            <span className="ml-2 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded-md text-xs font-semibold">
+              20+
+            </span>
+          </Button>
         </Link>
       </div>
 

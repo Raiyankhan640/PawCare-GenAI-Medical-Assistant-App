@@ -19,7 +19,7 @@ export default async function DoctorProfileLayout({ children, params }) {
   if (!doctor) redirect("/doctors");
 
   return (
-    <div className="container mx-auto">
+    <div className="container mx-auto" suppressHydrationWarning>
       <PageHeader
         // icon={<Stethoscope />}
         title={"Dr. " + doctor.name}

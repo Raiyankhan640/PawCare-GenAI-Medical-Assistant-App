@@ -23,7 +23,6 @@ import {
 import { Button, buttonVariants } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
-import { getUserCredits } from "@/actions/user";
 import { cn } from "@/lib/utils";
 
 export function Header() {
@@ -39,13 +38,35 @@ export function Header() {
   }, []);
 
   useEffect(() => {
-    if (clerkUser) {
-      getUserCredits().then((data) => {
-        setUserCredits(data.credits);
-        setUserRole(data.role);
-      });
+    if (clerkUser && isLoaded) {
+      console.log("[Header] Fetching credits for user:", clerkUser.id);
+      
+      const fetchCredits = async (retryCount = 0) => {
+        try {
+          // Pass clerkUserId as query param as fallback for clock skew issues
+          const res = await fetch(`/api/user/credits?clerkUserId=${clerkUser.id}`, {
+            cache: "no-store",
+          });
+          const data = await res.json();
+          console.log("[Header] Got credits data:", data);
+          
+          if (data.error && data.error !== "not_authenticated" && data.error !== "user_not_found") {
+            console.error("[Header] API error:", data.error);
+          }
+          
+          setUserCredits(data.credits || 0);
+          setUserRole(data.role);
+        } catch (err) {
+          console.error("[Header] Error fetching credits:", err);
+          if (retryCount < 2) {
+            setTimeout(() => fetchCredits(retryCount + 1), 300);
+          }
+        }
+      };
+      
+      fetchCredits();
     }
-  }, [clerkUser]);
+  }, [clerkUser, isLoaded, pathname]);
 
   const isActive = (path) => {
     if (!mounted) return false;
@@ -106,8 +127,8 @@ export function Header() {
 
           {/* Action Buttons */}
           <SignedIn>
-            {/* Doctor Dashboard */}
-            {clerkUser?.publicMetadata?.role === "DOCTOR" && (
+            {/* Doctor Dashboard - check both Clerk metadata and database role */}
+            {(clerkUser?.publicMetadata?.role === "DOCTOR" || userRole === "DOCTOR") && (
               <Link
                 href="/doctor"
                 className={cn(
@@ -120,8 +141,8 @@ export function Header() {
               </Link>
             )}
 
-            {/* Patient Appointments */}
-            {clerkUser?.publicMetadata?.role === "PATIENT" && (
+            {/* Patient Appointments - check both Clerk metadata and database role */}
+            {(clerkUser?.publicMetadata?.role === "PATIENT" || userRole === "PATIENT") && (
               <Link
                 href="/appointments"
                 className={cn(
@@ -134,8 +155,8 @@ export function Header() {
               </Link>
             )}
 
-            {/* Unassigned Onboarding */}
-            {clerkUser?.publicMetadata?.role === "UNASSIGNED" && (
+            {/* Unassigned Onboarding - only if no role set in both places */}
+            {(!clerkUser?.publicMetadata?.role || clerkUser?.publicMetadata?.role === "UNASSIGNED") && (!userRole || userRole === "UNASSIGNED") && (
               <Link
                 href="/onboarding"
                 className={cn(
