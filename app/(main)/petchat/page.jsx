@@ -1,22 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Script from "next/script";
 import ChatInterface from "./components/chat-interface";
 import ConversationSidebar from "./components/conversation-sidebar";
 import LocationBookmark from "./components/location-bookmark";
 import { Sparkles, Shield, Stethoscope, AlertCircle } from "lucide-react";
-import { getOrCreateConversation } from "@/actions/petchat";
-import { useEffect } from "react";
+import { useUser } from "@clerk/nextjs";
 
 export default function PetChatPage() {
+    const { user: clerkUser, isLoaded } = useUser();
     const [currentConversationId, setCurrentConversationId] = useState(null);
 
     useEffect(() => {
-        // Load or create initial conversation
+        // Wait for Clerk to load
+        if (!isLoaded || !clerkUser) return;
+
+        // Load or create initial conversation via API
         const initConversation = async () => {
             try {
-                const result = await getOrCreateConversation();
+                const response = await fetch(`/api/petchat/conversation?clerkUserId=${clerkUser.id}`);
+                const result = await response.json();
                 if (result.success && result.conversation) {
                     setCurrentConversationId(result.conversation.id);
                 }
@@ -25,7 +29,7 @@ export default function PetChatPage() {
             }
         };
         initConversation();
-    }, []);
+    }, [isLoaded, clerkUser]);
 
     const handleConversationSelect = (conversationId) => {
         setCurrentConversationId(conversationId);

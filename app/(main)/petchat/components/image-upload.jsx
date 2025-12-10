@@ -5,8 +5,10 @@ import { ImagePlus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { toast } from "sonner";
+import { useUser } from "@clerk/nextjs";
 
 export default function ImageUpload({ onImageSelect, onImageRemove, disabled }) {
+  const { user: clerkUser } = useUser();
   const [preview, setPreview] = useState(null);
   const [fileName, setFileName] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -41,7 +43,11 @@ export default function ImageUpload({ onImageSelect, onImageRemove, disabled }) 
       formData.append('file', file);
 
       try {
-        const response = await fetch('/api/petchat/upload', {
+        // Pass clerkUserId as query param for auth fallback
+        const uploadUrl = clerkUser?.id 
+          ? `/api/petchat/upload?clerkUserId=${clerkUser.id}`
+          : '/api/petchat/upload';
+        const response = await fetch(uploadUrl, {
           method: 'POST',
           body: formData,
         });

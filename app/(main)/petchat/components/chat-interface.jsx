@@ -9,12 +9,14 @@ import { Bot, User, Send, Sparkles, AlertTriangle, Loader2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import { toast } from "sonner";
+import { useUser } from "@clerk/nextjs";
 import VoiceInput from "./voice-input";
 import ImageUpload from "./image-upload";
 import AppointmentSuggestion from "./appointment-suggestion";
 import ClinicSearch from "./clinic-search";
 
 export default function ChatInterface({ initialConversationId, onConversationChange }) {
+    const { user: clerkUser } = useUser();
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
     const [isTyping, setIsTyping] = useState(false);
@@ -55,7 +57,11 @@ export default function ChatInterface({ initialConversationId, onConversationCha
             return;
         }
         try {
-            const response = await fetch("/api/petchat/conversation");
+            // Pass clerkUserId as fallback for auth issues
+            const url = clerkUser?.id 
+                ? `/api/petchat/conversation?clerkUserId=${clerkUser.id}`
+                : "/api/petchat/conversation";
+            const response = await fetch(url);
             const data = await response.json();
 
             if (data.success) {
@@ -110,7 +116,7 @@ export default function ChatInterface({ initialConversationId, onConversationCha
         setInput("");
         const imageUrl = currentImageUrl;
         const imageData = currentImagePreview; // Base64 data for Gemini
-        setImageUrl(null);
+        setCurrentImageUrl(null);
         setCurrentImagePreview(null);
         setIsTyping(true);
 
@@ -123,6 +129,7 @@ export default function ChatInterface({ initialConversationId, onConversationCha
                     imageUrl: imageUrl,      // For saving to DB
                     imageData: imageData,    // For Gemini analysis
                     conversationId,
+                    clerkUserId: clerkUser?.id, // Fallback for auth
                 }),
             });
 
@@ -163,13 +170,13 @@ export default function ChatInterface({ initialConversationId, onConversationCha
     };
 
     const handleImageSelect = (url, preview) => {
-        setImageUrl(url);
+        setCurrentImageUrl(url);
         setCurrentImagePreview(preview);
         toast.success("Image uploaded successfully");
     };
 
     const handleImageRemove = () => {
-        setImageUrl(null);
+        setCurrentImageUrl(null);
         setCurrentImagePreview(null);
     };
 

@@ -4,11 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Plus, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import {
-  getUserConversations,
-  createNewConversation,
-  deleteConversation,
-} from "@/actions/petchat";
+import { useUser } from "@clerk/nextjs";
 import { formatDistanceToNow } from "date-fns";
 
 export default function ConversationSidebar({
@@ -16,16 +12,22 @@ export default function ConversationSidebar({
   onConversationSelect,
   onNewConversation
 }) {
+  const { user: clerkUser, isLoaded } = useUser();
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadConversations();
-  }, []);
+    if (isLoaded && clerkUser) {
+      loadConversations();
+    }
+  }, [isLoaded, clerkUser]);
 
   const loadConversations = async () => {
+    if (!clerkUser?.id) return;
+    
     try {
-      const result = await getUserConversations();
+      const response = await fetch(`/api/petchat/conversations?clerkUserId=${clerkUser.id}`);
+      const result = await response.json();
       if (result.success) {
         setConversations(result.conversations);
       }
@@ -38,8 +40,15 @@ export default function ConversationSidebar({
   };
 
   const handleNewChat = async () => {
+    if (!clerkUser?.id) return;
+    
     try {
-      const result = await createNewConversation();
+      const response = await fetch("/api/petchat/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clerkUserId: clerkUser.id }),
+      });
+      const result = await response.json();
       if (result.success) {
         await loadConversations();
         onNewConversation(result.conversation.id);
@@ -53,11 +62,14 @@ export default function ConversationSidebar({
 
   const handleDelete = async (conversationId, e) => {
     e.stopPropagation();
+    if (!clerkUser?.id) return;
 
     if (!confirm("Delete this conversation?")) return;
 
     try {
-      await deleteConversation(conversationId);
+      await fetch(`/api/petchat/conversations?id=${conversationId}&clerkUserId=${clerkUser.id}`, {
+        method: "DELETE",
+      });
       await loadConversations();
 
       // If deleted current conversation, create new one

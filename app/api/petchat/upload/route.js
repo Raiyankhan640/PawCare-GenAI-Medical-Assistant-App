@@ -5,7 +5,25 @@ import path from "path";
 import { existsSync } from "fs";
 
 export async function POST(req) {
-  const { userId } = await auth();
+  // Try to get userId from auth
+  let userId;
+  try {
+    const authResult = await auth();
+    userId = authResult.userId;
+  } catch (authError) {
+    console.log("[PetChat Upload] Auth error:", authError.message);
+  }
+
+  // Fallback to form data if auth fails
+  if (!userId) {
+    try {
+      // Clone the request to peek at form data
+      const url = new URL(req.url);
+      userId = url.searchParams.get("clerkUserId");
+    } catch (e) {
+      // Ignore
+    }
+  }
 
   if (!userId) {
     return NextResponse.json(

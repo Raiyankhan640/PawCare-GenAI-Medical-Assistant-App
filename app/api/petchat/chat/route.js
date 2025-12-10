@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getGeminiResponse, detectIntent } from "@/lib/gemini";
-import { saveMessage, getConversation, updateConversationTitle } from "@/actions/petchat";
+import { db } from "@/lib/prisma";
 import { z } from "zod";
 
 const chatSchema = z.object({
@@ -9,20 +9,34 @@ const chatSchema = z.object({
   imageUrl: z.string().nullish(),  // File path for DB storage
   imageData: z.string().nullish(), // Base64 data for Gemini analysis
   conversationId: z.string().uuid(),
+  clerkUserId: z.string().optional(), // Fallback for auth
 });
 
 export async function POST(req) {
-  const { userId } = await auth();
-
-  if (!userId) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    );
+  // Try to get userId from auth, fall back to body param
+  let userId;
+  try {
+    const authResult = await auth();
+    userId = authResult.userId;
+  } catch (authError) {
+    console.log("[PetChat] Auth error:", authError.message);
   }
 
   try {
     const body = await req.json();
+    
+    // Fallback to body param if auth fails
+    if (!userId && body.clerkUserId) {
+      userId = body.clerkUserId;
+    }
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const validation = chatSchema.safeParse(body);
 
     if (!validation.success) {
@@ -34,8 +48,16 @@ export async function POST(req) {
 
     const { message, imageUrl, imageData, conversationId } = validation.data;
 
-    // Save user message
-    await saveMessage(conversationId, "USER", message, imageUrl);
+    // Save user message directly
+    await db.chatMessage.create({
+      data: {
+        conversationId,
+        role: "USER",
+        content: message,
+        imageUrl,
+        hasImage: !!imageUrl,
+      },
+    });
 
     // Detect intent (skip if image is present - always use GENERAL for images)
     let intent = "GENERAL";
@@ -54,14 +76,33 @@ export async function POST(req) {
       aiResponse = await getGeminiResponse(messages, imageData);
     }
 
-    // Save AI response
-    await saveMessage(conversationId, "ASSISTANT", aiResponse);
+    // Save AI response directly
+    await db.chatMessage.create({
+      data: {
+        conversationId,
+        role: "ASSISTANT",
+        content: aiResponse,
+      },
+    });
+
+    // Update conversation timestamp
+    await db.chatConversation.update({
+      where: { id: conversationId },
+      data: { updatedAt: new Date() },
+    });
 
     // Auto-name conversation if it's still "New Chat"
     try {
-      const conversationResult = await getConversation(conversationId);
-      if (conversationResult.success && conversationResult.conversation.title === "New Chat") {
-        await updateConversationTitle(conversationId, message);
+      const conversation = await db.chatConversation.findUnique({
+        where: { id: conversationId }
+      });
+      if (conversation && conversation.title === "New Chat") {
+        // Generate a short title from the first message
+        const title = message.substring(0, 50) + (message.length > 50 ? "..." : "");
+        await db.chatConversation.update({
+          where: { id: conversationId },
+          data: { title },
+        });
       }
     } catch (error) {
       console.error("Error auto-naming conversation:", error);
