@@ -6,12 +6,10 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { SignedIn, SignedOut, UserButton, SignInButton, useUser } from "@clerk/nextjs";
 import {
-  ShieldCheck,
   Stethoscope,
   Calendar,
   User,
   CreditCard,
-  Sparkles,
   Home,
   Phone,
   Info,
@@ -62,7 +60,8 @@ export function Header() {
     return `${base} ${isActive(path) ? active : inactive}`;
   };
 
-  const isAdmin = clerkUser?.publicMetadata?.role === "ADMIN";
+  // Use both Clerk metadata and database role for admin detection
+  const isAdmin = clerkUser?.publicMetadata?.role === "ADMIN" || userRole === "ADMIN";
 
   return (
     <header className="border-b border-emerald-900/20 sticky top-0 z-50 bg-linear-to-r from-background via-emerald-950/5 to-background backdrop-blur-xl supports-backdrop-filter:bg-background/80 shadow-lg shadow-emerald-500/5" suppressHydrationWarning>
@@ -79,7 +78,7 @@ export function Header() {
         </Link>
 
         {/* Desktop Nav */}
-        <nav className="hidden lg:flex items-center gap-2">
+        <nav className="hidden md:flex items-center gap-2">
           <Link href="/" className={getNavLinkClass("/")}>
             <Home className="h-4 w-4 group-hover:scale-110 transition-transform" />
             <span>Home</span>
@@ -107,22 +106,6 @@ export function Header() {
 
           {/* Action Buttons */}
           <SignedIn>
-            {/* Admin Dashboard Button */}
-            {isAdmin && (
-              <Link
-                href="/admin"
-                className={cn(
-                  "hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all",
-                  isActive("/admin")
-                    ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/30"
-                    : "bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-300 border border-purple-500/30 hover:from-purple-500/30 hover:to-pink-500/30"
-                )}
-              >
-                <LayoutDashboard className="h-4 w-4" />
-                Dashboard
-              </Link>
-            )}
-
             {/* Doctor Dashboard */}
             {clerkUser?.publicMetadata?.role === "DOCTOR" && (
               <Link
@@ -166,7 +149,23 @@ export function Header() {
             )}
           </SignedIn>
 
-          {/* Premium/Credits Badge (NOT for admins) */}
+          {/* Admin Dashboard Button - REPLACES Credits for admin users */}
+          {mounted && isAdmin && (
+            <Link
+              href="/admin"
+              className={cn(
+                "hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all",
+                isActive("/admin")
+                  ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/30"
+                  : "bg-gradient-to-r from-purple-500 to-pink-500 text-white border border-purple-400/30 hover:from-purple-600 hover:to-pink-600 shadow-md shadow-purple-500/20"
+              )}
+            >
+              <LayoutDashboard className="h-4 w-4" />
+              <span>Dashboard</span>
+            </Link>
+          )}
+
+          {/* Premium/Credits Badge (only for non-admin users) */}
           {mounted && !isAdmin && (
             <Link href="/pricing" className="hidden md:block">
               {!clerkUser ? (
@@ -195,7 +194,7 @@ export function Header() {
           {/* Mobile Menu Toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-2 rounded-lg hover:bg-emerald-900/30 text-emerald-400 transition-colors"
+            className="md:hidden p-2 rounded-lg hover:bg-emerald-900/30 text-emerald-400 transition-colors"
             aria-label="Toggle menu"
           >
             {mobileMenuOpen ? (
@@ -210,10 +209,10 @@ export function Header() {
               {/* User Role Badge */}
               {mounted && clerkUser?.publicMetadata?.role && (
                 <div className={`hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${clerkUser.publicMetadata.role === "DOCTOR"
-                    ? "bg-emerald-900/40 border-emerald-600/50 text-emerald-300"
-                    : clerkUser.publicMetadata.role === "ADMIN"
-                      ? "bg-purple-900/40 border-purple-600/50 text-purple-300"
-                      : "bg-blue-900/40 border-blue-600/50 text-blue-300"
+                  ? "bg-emerald-900/40 border-emerald-600/50 text-emerald-300"
+                  : clerkUser.publicMetadata.role === "ADMIN"
+                    ? "bg-purple-900/40 border-purple-600/50 text-purple-300"
+                    : "bg-blue-900/40 border-blue-600/50 text-blue-300"
                   }`}>
                   {clerkUser.publicMetadata.role === "DOCTOR" ? "🩺 Doctor" :
                     clerkUser.publicMetadata.role === "ADMIN" ? "👑 Admin" :

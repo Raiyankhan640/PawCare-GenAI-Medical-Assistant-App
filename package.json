@@ -26,6 +26,7 @@
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tabs": "^1.1.13",
+    "@tremor/react": "^3.18.7",
     "@vonage/applications": "^1.18.1",
     "@vonage/auth": "^1.13.1",
     "@vonage/client-sdk": "^2.1.3",
