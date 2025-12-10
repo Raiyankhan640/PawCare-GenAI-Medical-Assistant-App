@@ -80,14 +80,14 @@ export async function setUserRole(formData, clerkUserId = null) {
       const specialty = formData.get("specialty");
       const experience = parseInt(formData.get("experience"), 10);
       const credentialUrl = formData.get("credentialUrl");
-      const description = formData.get("description");
+      const description = formData.get("description") || "";
 
       console.log("[Onboarding] Doctor data:", { specialty, experience, credentialUrl, description });
 
-      // Validate inputs
-      if (!specialty || isNaN(experience) || !credentialUrl || !description) {
-        console.error("[Onboarding] Validation failed:", { specialty, experience, credentialUrl, description });
-        throw new Error("All fields are required for doctor registration");
+      // Validate required inputs (description is optional)
+      if (!specialty || isNaN(experience) || !credentialUrl) {
+        console.error("[Onboarding] Validation failed:", { specialty, experience, credentialUrl });
+        throw new Error("Specialty, experience, and credential URL are required for doctor registration");
       }
 
       const updatedUser = await db.user.update({

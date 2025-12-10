@@ -839,31 +839,31 @@ export default function AdminDashboardClient() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="doctors" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 bg-slate-800/50 p-1 rounded-xl">
+            <TabsList className="!grid !w-full !grid-cols-4 bg-slate-800/50 p-1 rounded-xl h-auto">
               <TabsTrigger
                 value="doctors"
-                className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-lg"
+                className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-lg py-2 px-3 text-sm"
               >
                 <Stethoscope className="h-4 w-4 mr-2" />
                 Doctors ({data?.verifiedDoctors?.length || 0})
               </TabsTrigger>
               <TabsTrigger
                 value="pending"
-                className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-lg"
+                className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-lg py-2 px-3 text-sm"
               >
                 <UserCheck className="h-4 w-4 mr-2" />
                 Pending ({data?.pendingDoctors?.length || 0})
               </TabsTrigger>
               <TabsTrigger
                 value="users"
-                className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-lg"
+                className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-lg py-2 px-3 text-sm"
               >
                 <Users className="h-4 w-4 mr-2" />
                 Users
               </TabsTrigger>
               <TabsTrigger
                 value="payouts"
-                className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-lg"
+                className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-lg py-2 px-3 text-sm"
               >
                 <DollarSign className="h-4 w-4 mr-2" />
                 Payouts ({data?.pendingPayouts?.length || 0})
