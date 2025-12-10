@@ -27,7 +27,7 @@ export function StatsSection() {
             Trusted by Pet Parents Everywhere
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Join our growing community of pet lovers and veterinary professionals
+            Join our growing community of pet lovers and veterinary professionals in Bangladesh
           </p>
         </div>
 

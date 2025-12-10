@@ -63,12 +63,12 @@ const DoctorAvatar = memo(function DoctorAvatar({ imageUrl, name }) {
 // Main DoctorCard component - memoized with custom comparison
 export const DoctorCard = memo(function DoctorCard({ doctor, index = 0 }) {
   // Memoize computed values
-  const doctorDescription = useMemo(() => 
+  const doctorDescription = useMemo(() =>
     doctor.description || "Experienced veterinarian dedicated to providing exceptional care for your beloved pets with compassion and expertise.",
     [doctor.description]
   );
 
-  const profileLink = useMemo(() => 
+  const profileLink = useMemo(() =>
     `/doctors/${doctor.specialty}/${doctor.id}`,
     [doctor.specialty, doctor.id]
   );
@@ -79,14 +79,14 @@ export const DoctorCard = memo(function DoctorCard({ doctor, index = 0 }) {
   }), [index]);
 
   return (
-    <div 
+    <div
       className="animate-fade-in-up hover:-translate-y-2 transition-transform duration-300"
       style={animationStyle}
     >
       <Card className="border-emerald-900/20 hover:border-emerald-600/50 transition-all duration-300 overflow-hidden group relative bg-linear-to-br from-card/80 to-card/40 backdrop-blur-xl shadow-lg hover:shadow-2xl hover:shadow-emerald-500/20">
         {/* Gradient overlay - CSS only */}
         <div className="absolute inset-0 bg-linear-to-br from-emerald-500/0 to-teal-500/0 group-hover:from-emerald-500/5 group-hover:to-teal-500/5 transition-all duration-500" />
-        
+
         {/* Shimmer effect - CSS only */}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
           <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
@@ -104,7 +104,7 @@ export const DoctorCard = memo(function DoctorCard({ doctor, index = 0 }) {
                 <h3 className="font-bold text-white text-lg group-hover:text-emerald-400 transition-colors line-clamp-1">
                   Dr. {doctor.name}
                 </h3>
-                
+
                 <Badge
                   variant="outline"
                   className="bg-emerald-900/30 border-emerald-600/40 text-emerald-400 shrink-0 shadow-lg group-hover:rotate-3 transition-transform"
@@ -116,8 +116,8 @@ export const DoctorCard = memo(function DoctorCard({ doctor, index = 0 }) {
 
               {/* Specialty Badge */}
               <div className="flex items-center gap-2 mb-2">
-                <Badge 
-                  variant="outline" 
+                <Badge
+                  variant="outline"
                   className="bg-linear-to-r from-emerald-950/40 to-teal-950/40 border-emerald-700/30 text-emerald-300 text-xs"
                 >
                   <Stethoscope className="h-3 w-3 mr-1" />

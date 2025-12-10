@@ -76,8 +76,21 @@ export async function POST(req) {
   } catch (error) {
     console.error("PetChat API error:", error);
 
+    // Better error messages for common issues
+    let errorMessage = "Failed to process message. Please try again.";
+
+    if (error.message?.includes("GEMINI_API_KEY not configured")) {
+      errorMessage = "AI service is not configured. Please contact support.";
+    } else if (error.message?.includes("Gemini API error")) {
+      errorMessage = "AI service temporarily unavailable. Please try again in a moment.";
+    }
+
     return NextResponse.json(
-      { error: "Failed to process message" },
+      {
+        success: false,
+        error: errorMessage,
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      },
       { status: 500 }
     );
   }

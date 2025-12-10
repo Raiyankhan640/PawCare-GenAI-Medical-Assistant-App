@@ -4,22 +4,82 @@ import { db } from "@/lib/prisma";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { deductCreditsForAppointment } from "@/actions/credits";
-import { Vonage } from "@vonage/server-sdk";
 import { addDays, addMinutes, format, isBefore, endOfDay } from "date-fns";
-import { Auth } from "@vonage/auth";
-import fs from "fs";
-import path from "path";
+import crypto from "crypto";
 
-// Initialize Vonage Video API client
-const privateKeyPath = path.join(process.cwd(), 'lib', 'private.key');
-const privateKey = process.env.VONAGE_PRIVATE_KEY || fs.readFileSync(privateKeyPath, 'utf8');
+const API_KEY = process.env.VONAGE_API_KEY;
+const API_SECRET = process.env.VONAGE_API_SECRET;
 
-const credentials = new Auth({
-  applicationId: process.env.NEXT_PUBLIC_VONAGE_APPLICATION_ID,
-  privateKey: privateKey,
-});
-const options = {};
-const vonage = new Vonage(credentials, options);
+/**
+ * Base64 URL encode (replace +/= with -_)
+ */
+function base64UrlEncode(str) {
+  return Buffer.from(str)
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=/g, "");
+}
+
+/**
+ * Generate JWT token for OpenTok API authentication
+ */
+function generateOpenTokAuthToken() {
+  const now = Math.floor(Date.now() / 1000);
+  const payload = {
+    iss: API_KEY,
+    ist: "project",
+    iat: now,
+    exp: now + 300,
+  };
+
+  const header = { typ: "JWT", alg: "HS256" };
+  const encodedHeader = base64UrlEncode(JSON.stringify(header));
+  const encodedPayload = base64UrlEncode(JSON.stringify(payload));
+  const signature = crypto
+    .createHmac("sha256", API_SECRET)
+    .update(`${encodedHeader}.${encodedPayload}`)
+    .digest("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=/g, "");
+
+  return `${encodedHeader}.${encodedPayload}.${signature}`;
+}
+
+/**
+ * Generate token for OpenTok client
+ */
+function generateClientToken(sessionId, options = {}) {
+  const now = Math.floor(Date.now() / 1000);
+  const nonce = Math.random().toString(36).substring(7);
+  
+  const payload = {
+    iss: API_KEY,
+    ist: "project",
+    iat: now,
+    exp: options.expireTime || now + 86400, // 24 hours default
+    jti: `${now}_${nonce}`,
+    acl: {
+      paths: {
+        [`/session/${sessionId}`]: {},
+      },
+    },
+  };
+
+  const header = { typ: "JWT", alg: "HS256" };
+  const encodedHeader = base64UrlEncode(JSON.stringify(header));
+  const encodedPayload = base64UrlEncode(JSON.stringify(payload));
+  const signature = crypto
+    .createHmac("sha256", API_SECRET)
+    .update(`${encodedHeader}.${encodedPayload}`)
+    .digest("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=/g, "");
+
+  return `${encodedHeader}.${encodedPayload}.${signature}`;
+}
 
 /**
  * Ensure the signed-in Clerk user has a patient row
@@ -160,9 +220,19 @@ export async function bookAppointment(formData) {
       throw new Error("This time slot is already booked");
     }
 
-    // Create a new Vonage Video API session (skipped for now)
-    // const sessionId = await createVideoSession();
-    const sessionId = null; // Temporarily skip video session creation
+    // Create a new OpenTok Video API session
+    console.log("Creating video session with API_KEY:", API_KEY);
+    console.log("API_SECRET length:", API_SECRET?.length);
+    
+    let sessionId;
+    try {
+      sessionId = await createVideoSession();
+      console.log("Video session created successfully:", sessionId);
+    } catch (error) {
+      console.error("Failed to create video session:", error.message);
+      // Set to null so appointment can still be created
+      sessionId = null;
+    }
 
     // Deduct credits from patient and add to doctor
     const { success, error } = await deductCreditsForAppointment(
@@ -196,13 +266,60 @@ export async function bookAppointment(formData) {
 }
 
 /**
- * Generate a Vonage Video API session
+ * Generate a Vonage Video API session using REST API
  */
 async function createVideoSession() {
   try {
-    const session = await vonage.video.createSession({ mediaMode: "routed" });
-    return session.sessionId;
+    const authToken = generateOpenTokAuthToken();
+    const https = await import("https");
+    const querystring = await import("querystring");
+
+    const postData = querystring.stringify({
+      "p2p.preference": "disabled",
+    });
+
+    return new Promise((resolve, reject) => {
+      const options = {
+        hostname: "api.opentok.com",
+        path: "/session/create",
+        method: "POST",
+        headers: {
+          "X-OPENTOK-AUTH": authToken,
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Length": Buffer.byteLength(postData),
+        },
+      };
+
+      const req = https.request(options, (res) => {
+        let data = "";
+
+        res.on("data", (chunk) => {
+          data += chunk;
+        });
+
+        res.on("end", () => {
+          if (res.statusCode === 200) {
+            const sessionIdMatch = data.match(/<session_id>(.*?)<\/session_id>/);
+            if (sessionIdMatch && sessionIdMatch[1]) {
+              resolve(sessionIdMatch[1]);
+            } else {
+              reject(new Error("Could not extract session ID from response"));
+            }
+          } else {
+            reject(new Error(`OpenTok API error: ${res.statusCode} - ${data}`));
+          }
+        });
+      });
+
+      req.on("error", (error) => {
+        reject(error);
+      });
+
+      req.write(postData);
+      req.end();
+    });
   } catch (error) {
+    console.error("Failed to create video session:", error);
     throw new Error("Failed to create video session: " + error.message);
   }
 }
@@ -260,7 +377,7 @@ export async function generateVideoToken(formData) {
     if (!appointment.videoSessionId) {
       return {
         success: false,
-        error: "Video calling is not available for this appointment. Please contact support.",
+        error: "Video calling is temporarily disabled. The appointment is confirmed but video features are being configured. Please check back later or contact support.",
       };
     }
 
@@ -288,16 +405,14 @@ export async function generateVideoToken(formData) {
       userId: user.id,
     });
 
-    // Generate the token with appropriate role and expiration
+    // Generate the token using custom implementation
     let token;
     try {
-      token = vonage.video.generateClientToken(appointment.videoSessionId, {
-        role: "publisher", // Both doctor and patient can publish streams
+      token = generateClientToken(appointment.videoSessionId, {
         expireTime: expirationTime,
-        data: connectionData,
       });
     } catch (videoError) {
-      console.error("Vonage token generation failed:", videoError);
+      console.error("Video token generation failed:", videoError);
       return {
         success: false,
         error: "Video calling service is currently unavailable. Please try again later or contact support.",

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,31 +32,54 @@ const staggerContainer = {
   },
 };
 
-const FloatingGridBackground = () => (
-  <div className="absolute inset-0 overflow-hidden opacity-10">
-    {[...Array(18)].map((_, index) => (
-      <motion.div
-        key={index}
-        className="absolute bg-emerald-400 rounded-full"
-        style={{
-          width: Math.random() * 60 + 20,
-          height: Math.random() * 60 + 20,
-          left: `${Math.random() * 100}%`,
-          top: `${Math.random() * 100}%`,
-        }}
-        animate={{
-          y: [0, -25, 0],
-          opacity: [0.2, 0.6, 0.2],
-        }}
-        transition={{
-          duration: Math.random() * 3 + 2,
-          repeat: Infinity,
-          delay: Math.random() * 2,
-        }}
-      />
-    ))}
-  </div>
-);
+const FloatingGridBackground = () => {
+  const [mounted, setMounted] = useState(false);
+  const [items, setItems] = useState([]);
+
+  useEffect(() => {
+    setMounted(true);
+    setItems(
+      [...Array(18)].map(() => ({
+        width: Math.random() * 60 + 20,
+        height: Math.random() * 60 + 20,
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 100}%`,
+        duration: Math.random() * 3 + 2,
+        delay: Math.random() * 2,
+      }))
+    );
+  }, []);
+
+  if (!mounted) {
+    return <div className="absolute inset-0 overflow-hidden opacity-10" />;
+  }
+
+  return (
+    <div className="absolute inset-0 overflow-hidden opacity-10">
+      {items.map((item, i) => (
+        <motion.div
+          key={i}
+          className="absolute bg-emerald-400 rounded-full"
+          style={{
+            width: item.width,
+            height: item.height,
+            left: item.left,
+            top: item.top,
+          }}
+          animate={{
+            y: [0, -25, 0],
+            opacity: [0.2, 0.6, 0.2],
+          }}
+          transition={{
+            duration: item.duration,
+            repeat: Infinity,
+            delay: item.delay,
+          }}
+        />
+      ))}
+    </div>
+  );
+};
 
 const ContactInfoCard = ({ icon, title, details, description }) => (
   <motion.div variants={fadeInUp}>
@@ -95,6 +119,23 @@ const FAQCard = ({ question, answer }) => (
 const MotionCard = motion(Card);
 
 export default function ContactPageContent() {
+  const [ctaMounted, setCtaMounted] = useState(false);
+  const [ctaParticles, setCtaParticles] = useState([]);
+
+  useEffect(() => {
+    setCtaMounted(true);
+    setCtaParticles(
+      [...Array(3)].map(() => ({
+        width: Math.random() * 100 + 60,
+        height: Math.random() * 100 + 60,
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 100}%`,
+        duration: Math.random() * 4 + 3,
+        delay: Math.random() * 2,
+      }))
+    );
+  }, []);
+
   const contactInfo = [
     {
       icon: <Mail className="h-6 w-6 text-emerald-400" />,
@@ -336,24 +377,24 @@ export default function ContactPageContent() {
             >
               <Card className="bg-gradient-to-r from-emerald-900/30 to-cyan-900/20 border-emerald-800/30 backdrop-blur-sm relative overflow-hidden">
                 <div className="absolute inset-0">
-                  {[...Array(3)].map((_, index) => (
+                  {ctaMounted && ctaParticles.map((item, i) => (
                     <motion.div
-                      key={index}
+                      key={i}
                       className="absolute bg-emerald-400/15 rounded-full"
                       style={{
-                        width: Math.random() * 100 + 60,
-                        height: Math.random() * 100 + 60,
-                        left: `${Math.random() * 100}%`,
-                        top: `${Math.random() * 100}%`,
+                        width: item.width,
+                        height: item.height,
+                        left: item.left,
+                        top: item.top,
                       }}
                       animate={{
                         scale: [1, 1.15, 1],
                         opacity: [0.25, 0.55, 0.25],
                       }}
                       transition={{
-                        duration: Math.random() * 4 + 3,
+                        duration: item.duration,
                         repeat: Infinity,
-                        delay: Math.random() * 2,
+                        delay: item.delay,
                       }}
                     />
                   ))}

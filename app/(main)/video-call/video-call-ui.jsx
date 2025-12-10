@@ -28,7 +28,7 @@ export default function VideoCall({ sessionId, token }) {
 
   const router = useRouter();
 
-  const appId = process.env.NEXT_PUBLIC_VONAGE_APPLICATION_ID;
+  const apiKey = process.env.NEXT_PUBLIC_VONAGE_API_KEY || "87472970";
 
   // Handle script load
   const handleScriptLoad = () => {
@@ -43,17 +43,17 @@ export default function VideoCall({ sessionId, token }) {
 
   // Initialize video session
   const initializeSession = () => {
-    if (!appId || !sessionId || !token) {
+    if (!apiKey || !sessionId || !token) {
       toast.error("Missing required video call parameters");
       router.push("/appointments");
       return;
     }
 
-    console.log({ appId, sessionId, token });
+    console.log({ apiKey, sessionId, token });
 
     try {
       // Initialize the session
-      sessionRef.current = window.OT.initSession(appId, sessionId);
+      sessionRef.current = window.OT.initSession(apiKey, sessionId);
 
       // Subscribe to new streams
       sessionRef.current.on("streamCreated", (event) => {
@@ -198,7 +198,7 @@ export default function VideoCall({ sessionId, token }) {
   return (
     <>
       <Script
-        src="https://unpkg.com/@vonage/client-sdk-video@latest/dist/js/opentok.js"
+        src="https://video.standard.vonage.com/v2/js/opentok.min.js"
         onLoad={handleScriptLoad}
         onError={() => {
           toast.error("Failed to load video call script");

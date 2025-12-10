@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SPECIALTIES } from "@/lib/specialities";
-import { Calendar, Shield, Star, Users, CheckCircle } from "lucide-react";
+import { Calendar, Shield, Star, Users, CheckCircle, Search } from "lucide-react";
 
 export default async function DoctorsPage() {
   return (
@@ -47,6 +47,29 @@ export default async function DoctorsPage() {
             <p className="text-sm text-muted-foreground">No Waiting Times</p>
           </div>
         </div>
+      </div>
+
+      {/* View All Doctors Button */}
+      <div className="flex justify-center mb-12">
+        <Link href="/doctors/all">
+          <div className="group relative">
+            {/* Glow effect background */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 rounded-2xl blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt"></div>
+
+            {/* Button */}
+            <Button className="relative bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-8 md:px-12 py-6 md:py-8 h-auto text-base md:text-xl rounded-2xl shadow-2xl shadow-emerald-500/50 font-bold transition-all duration-300 group-hover:scale-105">
+              <div className="flex items-center gap-3">
+                <Search className="w-5 h-5 md:w-6 md:h-6 group-hover:rotate-12 transition-transform" />
+                <span className="bg-gradient-to-r from-white to-emerald-100 bg-clip-text text-transparent">
+                  View All Doctors & Search
+                </span>
+                <div className="ml-2 px-2 py-1 bg-white/20 rounded-lg text-xs md:text-sm backdrop-blur-sm">
+                  20 Vets
+                </div>
+              </div>
+            </Button>
+          </div>
+        </Link>
       </div>
 
       {/* Specialties Grid */}

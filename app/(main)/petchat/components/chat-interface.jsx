@@ -44,6 +44,11 @@ export default function ChatInterface({ initialConversationId, onConversationCha
         }
     }, [initialConversationId]);
 
+    const scrollToBottom = () => {
+        // Simple smooth scroll, only called manually or on initial load now
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
     const loadConversation = async (convId = conversationId) => {
         if (!convId) {
             setIsLoading(false);
@@ -73,6 +78,9 @@ export default function ChatInterface({ initialConversationId, onConversationCha
                         hasImage: msg.hasImage,
                     }));
                     setMessages(loadedMessages);
+
+                    // FIXED: Scroll to bottom ONLY on initial load, not on every update
+                    setTimeout(() => scrollToBottom(), 100);
                 }
             } else {
                 toast.error("Failed to load conversation");
@@ -85,13 +93,8 @@ export default function ChatInterface({ initialConversationId, onConversationCha
         }
     };
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
-
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
+    // --- FIXED: REMOVED THE AUTO-SCROLL USEEFFECT HERE ---
+    // The previous useEffect dependent on [messages] was causing the annoyance.
 
     const handleSend = async () => {
         if (!input.trim() || !conversationId) return;
@@ -107,7 +110,7 @@ export default function ChatInterface({ initialConversationId, onConversationCha
         setInput("");
         const imageUrl = currentImageUrl;
         const imageData = currentImagePreview; // Base64 data for Gemini
-        setCurrentImageUrl(null);
+        setImageUrl(null);
         setCurrentImagePreview(null);
         setIsTyping(true);
 
@@ -160,13 +163,13 @@ export default function ChatInterface({ initialConversationId, onConversationCha
     };
 
     const handleImageSelect = (url, preview) => {
-        setCurrentImageUrl(url);
+        setImageUrl(url);
         setCurrentImagePreview(preview);
         toast.success("Image uploaded successfully");
     };
 
     const handleImageRemove = () => {
-        setCurrentImageUrl(null);
+        setImageUrl(null);
         setCurrentImagePreview(null);
     };
 
@@ -210,7 +213,8 @@ export default function ChatInterface({ initialConversationId, onConversationCha
                 </div>
 
                 {/* Messages */}
-                <div className="h-[500px] overflow-y-auto p-6 space-y-4 scroll-smooth">
+                {/* Fixed: Added overflow-anchor: none to prevent browser scroll jumping */}
+                <div className="h-[500px] overflow-y-auto p-6 space-y-4 scroll-smooth [overflow-anchor:none]">
                     <AnimatePresence mode="popLayout">
                         {messages.filter(msg => msg && msg.role && msg.content).map((msg, idx) => (
                             <motion.div

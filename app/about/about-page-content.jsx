@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Heart, Shield, Clock, Award, Users, Stethoscope, Sparkles, PawPrint } from "lucide-react";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
+import { useState, useEffect } from "react";
 
 // Animation variants
 const fadeInUp = {
@@ -52,26 +53,47 @@ const AnimatedCounter = ({ number, label }) => {
 
 // Floating Grid Background Component
 const FloatingGridBackground = () => {
+  const [mounted, setMounted] = useState(false);
+  const [items, setItems] = useState([]);
+
+  useEffect(() => {
+    setMounted(true);
+    setItems(
+      [...Array(20)].map(() => ({
+        width: Math.random() * 60 + 20,
+        height: Math.random() * 60 + 20,
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 100}%`,
+        duration: Math.random() * 3 + 2,
+        delay: Math.random() * 2,
+      }))
+    );
+  }, []);
+
+  if (!mounted) {
+    return <div className="absolute inset-0 overflow-hidden opacity-10" />;
+  }
+
   return (
     <div className="absolute inset-0 overflow-hidden opacity-10">
-      {[...Array(20)].map((_, i) => (
+      {items.map((item, i) => (
         <motion.div
           key={i}
           className="absolute bg-emerald-400 rounded-full"
           style={{
-            width: Math.random() * 60 + 20,
-            height: Math.random() * 60 + 20,
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
+            width: item.width,
+            height: item.height,
+            left: item.left,
+            top: item.top,
           }}
           animate={{
             y: [0, -30, 0],
             opacity: [0.3, 0.7, 0.3],
           }}
           transition={{
-            duration: Math.random() * 3 + 2,
+            duration: item.duration,
             repeat: Infinity,
-            delay: Math.random() * 2,
+            delay: item.delay,
           }}
         />
       ))}
@@ -153,6 +175,23 @@ export default function AboutPageContent() {
     { icon: "⚡", text: "Quick Responses" },
   ];
 
+  const [ctaParticles, setCtaParticles] = useState([]);
+  const [ctaMounted, setCtaMounted] = useState(false);
+
+  useEffect(() => {
+    setCtaMounted(true);
+    setCtaParticles(
+      [...Array(3)].map(() => ({
+        width: Math.random() * 100 + 50,
+        height: Math.random() * 100 + 50,
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 100}%`,
+        duration: Math.random() * 4 + 3,
+        delay: Math.random() * 2,
+      }))
+    );
+  }, []);
+
   return (
     <div className="bg-gradient-to-br from-gray-900 via-emerald-950 to-gray-900 min-h-screen">
       {/* Hero Section */}
@@ -177,7 +216,7 @@ export default function AboutPageContent() {
                 About PawCare
               </Badge>
             </motion.div>
-            
+
             <motion.h1
               variants={fadeInUp}
               className="text-4xl md:text-6xl font-bold text-white mb-6"
@@ -187,13 +226,13 @@ export default function AboutPageContent() {
                 Accessible to All
               </span>
             </motion.h1>
-            
+
             <motion.p
               variants={fadeInUp}
               className="text-muted-foreground text-lg md:text-xl leading-relaxed"
             >
-              PawCare is revolutionizing veterinary care by connecting pet owners with 
-              qualified veterinarians through our secure telemedicine platform. We believe 
+              PawCare is revolutionizing veterinary care by connecting pet owners with
+              qualified veterinarians through our secure telemedicine platform. We believe
               every pet deserves quality healthcare, anytime, anywhere.
             </motion.p>
           </motion.div>
@@ -239,13 +278,13 @@ export default function AboutPageContent() {
                 Transforming Veterinary Care Through Technology
               </h2>
               <p className="text-muted-foreground mb-4 text-lg">
-                Founded with a passion for animal welfare, PawCare bridges the gap between 
-                pet owners and veterinary professionals. We understand that pets are family, 
+                Founded with a passion for animal welfare, PawCare bridges the gap between
+                pet owners and veterinary professionals. We understand that pets are family,
                 and accessing quality care shouldn't be complicated or time-consuming.
               </p>
               <p className="text-muted-foreground mb-4 text-lg">
-                Our platform provides instant access to licensed veterinarians who can 
-                diagnose, prescribe, and guide you through your pet's health journey—all 
+                Our platform provides instant access to licensed veterinarians who can
+                diagnose, prescribe, and guide you through your pet's health journey—all
                 from the comfort of your home.
               </p>
             </motion.div>
@@ -272,7 +311,7 @@ export default function AboutPageContent() {
                   </motion.div>
                 ))}
               </div>
-              
+
               {/* Floating elements */}
               <motion.div
                 animate={{
@@ -288,7 +327,7 @@ export default function AboutPageContent() {
               >
                 <PawPrint className="h-6 w-6 text-emerald-400" />
               </motion.div>
-              
+
               <motion.div
                 animate={{
                   y: [0, 15, 0],
@@ -364,7 +403,7 @@ export default function AboutPageContent() {
               Built by Pet Lovers, For Pet Lovers
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Our diverse team combines veterinary expertise, technology innovation, 
+              Our diverse team combines veterinary expertise, technology innovation,
               and a shared love for animals to create the best pet healthcare platform.
             </p>
           </motion.div>
@@ -392,9 +431,9 @@ export default function AboutPageContent() {
                       Join Our Growing Community
                     </h3>
                     <p className="text-muted-foreground mb-4 text-lg">
-                      We're constantly growing our network of veterinary professionals 
-                      and pet care experts. If you're passionate about animal welfare 
-                      and want to be part of the future of veterinary care, we'd love 
+                      We're constantly growing our network of veterinary professionals
+                      and pet care experts. If you're passionate about animal welfare
+                      and want to be part of the future of veterinary care, we'd love
                       to hear from you.
                     </p>
                     <motion.a
@@ -423,29 +462,29 @@ export default function AboutPageContent() {
             <Card className="bg-gradient-to-r from-emerald-900/30 to-cyan-900/20 border-emerald-800/20 backdrop-blur-sm relative overflow-hidden">
               {/* Animated background elements */}
               <div className="absolute inset-0">
-                {[...Array(3)].map((_, i) => (
+                {ctaMounted && ctaParticles.map((item, i) => (
                   <motion.div
                     key={i}
                     className="absolute bg-emerald-400/10 rounded-full"
                     style={{
-                      width: Math.random() * 100 + 50,
-                      height: Math.random() * 100 + 50,
-                      left: `${Math.random() * 100}%`,
-                      top: `${Math.random() * 100}%`,
+                      width: item.width,
+                      height: item.height,
+                      left: item.left,
+                      top: item.top,
                     }}
                     animate={{
                       scale: [1, 1.2, 1],
                       opacity: [0.3, 0.6, 0.3],
                     }}
                     transition={{
-                      duration: Math.random() * 4 + 3,
+                      duration: item.duration,
                       repeat: Infinity,
-                      delay: Math.random() * 2,
+                      delay: item.delay,
                     }}
                   />
                 ))}
               </div>
-              
+
               <CardContent className="p-8 md:p-12 text-center relative z-10">
                 <motion.div
                   animate={{ rotate: 360 }}
@@ -454,7 +493,7 @@ export default function AboutPageContent() {
                 >
                   <Stethoscope className="h-12 w-12 text-emerald-400 mx-auto" />
                 </motion.div>
-                
+
                 <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
                   Ready to Experience Better Pet Care?
                 </h2>
