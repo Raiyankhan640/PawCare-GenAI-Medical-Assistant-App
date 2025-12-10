@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useUser } from "@clerk/nextjs";
 import {
   Card,
   CardContent,
@@ -26,9 +27,9 @@ import { setUserRole } from "@/actions/onboarding";
 import { doctorFormSchema } from "@/lib/schema";
 import { SPECIALTIES } from "@/lib/specialities";
 import useFetch from "@/hooks/use-fetch";
-import { useEffect } from "react";
 
 export default function OnboardingPage() {
+  const { user: clerkUser } = useUser();
   const [step, setStep] = useState("choose-role");
   const router = useRouter();
 
@@ -62,7 +63,8 @@ export default function OnboardingPage() {
     const formData = new FormData();
     formData.append("role", "PATIENT");
 
-    await submitUserRole(formData);
+    // Pass clerkUserId as second argument for auth fallback
+    await submitUserRole(formData, clerkUser?.id);
   };
 
   useEffect(() => {
@@ -72,17 +74,18 @@ export default function OnboardingPage() {
   }, [data]);
 
   // Added missing onDoctorSubmit function
-  const onDoctorSubmit = async (data) => {
+  const onDoctorSubmit = async (formValues) => {
     if (loading) return;
 
     const formData = new FormData();
     formData.append("role", "DOCTOR");
-    formData.append("specialty", data.specialty);
-    formData.append("experience", data.experience.toString());
-    formData.append("credentialUrl", data.credentialUrl);
-    formData.append("description", data.description);
+    formData.append("specialty", formValues.specialty);
+    formData.append("experience", formValues.experience.toString());
+    formData.append("credentialUrl", formValues.credentialUrl);
+    formData.append("description", formValues.description);
 
-    await submitUserRole(formData);
+    // Pass clerkUserId as second argument for auth fallback
+    await submitUserRole(formData, clerkUser?.id);
   };
 
   // Role selection screen

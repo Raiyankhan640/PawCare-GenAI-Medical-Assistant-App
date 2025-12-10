@@ -6,10 +6,28 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache";
 
 /**
+ * Helper to get userId with fallback
+ */
+async function getAuthUserId() {
+  try {
+    const authResult = await auth();
+    return authResult.userId;
+  } catch (error) {
+    console.log("[Admin] Auth error:", error.message);
+    return null;
+  }
+}
+
+/**
  * Verifies if current user has admin role
  */
-export async function verifyAdmin() {
-  const { userId } = await auth();
+export async function verifyAdmin(clerkUserId = null) {
+  let userId = await getAuthUserId();
+  
+  // Fallback to provided clerkUserId
+  if (!userId && clerkUserId) {
+    userId = clerkUserId;
+  }
 
   if (!userId) {
     return false;

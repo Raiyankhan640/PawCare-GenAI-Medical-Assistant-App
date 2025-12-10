@@ -5,10 +5,28 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 
 /**
+ * Helper to get userId with fallback
+ */
+async function getAuthUserId() {
+  try {
+    const authResult = await auth();
+    return authResult.userId;
+  } catch (error) {
+    console.log("[Onboarding] Auth error:", error.message);
+    return null;
+  }
+}
+
+/**
  * Sets the user's role and related information
  */
-export async function setUserRole(formData) {
-  const { userId } = await auth();
+export async function setUserRole(formData, clerkUserId = null) {
+  let userId = await getAuthUserId();
+  
+  // Fallback to provided clerkUserId
+  if (!userId && clerkUserId) {
+    userId = clerkUserId;
+  }
 
   if (!userId) {
     throw new Error("Unauthorized");
