@@ -20,6 +20,7 @@ import {
   Menu,
   X,
   ArrowRight,
+  LayoutDashboard,
 } from "lucide-react";
 import { Button, buttonVariants } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -60,6 +61,8 @@ export function Header() {
     const inactive = "text-muted-foreground hover:text-emerald-400";
     return `${base} ${isActive(path) ? active : inactive}`;
   };
+
+  const isAdmin = clerkUser?.publicMetadata?.role === "ADMIN";
 
   return (
     <header className="border-b border-emerald-900/20 sticky top-0 z-50 bg-linear-to-r from-background via-emerald-950/5 to-background backdrop-blur-xl supports-backdrop-filter:bg-background/80 shadow-lg shadow-emerald-500/5" suppressHydrationWarning>
@@ -104,19 +107,23 @@ export function Header() {
 
           {/* Action Buttons */}
           <SignedIn>
-            {/* Admin/Doctor/Patient/Unassigned Actions */}
-            {clerkUser?.publicMetadata?.role === "ADMIN" && (
+            {/* Admin Dashboard Button */}
+            {isAdmin && (
               <Link
                 href="/admin"
                 className={cn(
-                  buttonVariants({ variant: "outline" }),
-                  `hidden lg:inline-flex items-center gap-2 transition-all ${isActive("/admin") ? "border-emerald-500/50 bg-emerald-900/40 text-emerald-400" : "border-emerald-700/30 hover:bg-emerald-900/30 hover:border-emerald-600/50"}`
+                  "hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all",
+                  isActive("/admin")
+                    ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/30"
+                    : "bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-300 border border-purple-500/30 hover:from-purple-500/30 hover:to-pink-500/30"
                 )}
               >
-                <ShieldCheck className="h-4 w-4" />
-                Admin
+                <LayoutDashboard className="h-4 w-4" />
+                Dashboard
               </Link>
             )}
+
+            {/* Doctor Dashboard */}
             {clerkUser?.publicMetadata?.role === "DOCTOR" && (
               <Link
                 href="/doctor"
@@ -129,6 +136,8 @@ export function Header() {
                 Dashboard
               </Link>
             )}
+
+            {/* Patient Appointments */}
             {clerkUser?.publicMetadata?.role === "PATIENT" && (
               <Link
                 href="/appointments"
@@ -141,6 +150,8 @@ export function Header() {
                 Appointments
               </Link>
             )}
+
+            {/* Unassigned Onboarding */}
             {clerkUser?.publicMetadata?.role === "UNASSIGNED" && (
               <Link
                 href="/onboarding"
@@ -155,26 +166,22 @@ export function Header() {
             )}
           </SignedIn>
 
-          {/* Premium/Credits Badge (Consolidated) */}
-          {mounted && (
+          {/* Premium/Credits Badge (NOT for admins) */}
+          {mounted && !isAdmin && (
             <Link href="/pricing" className="hidden md:block">
-              {(!clerkUser || clerkUser?.publicMetadata?.role !== "ADMIN") && (
-                <>
-                  {!clerkUser ? (
-                    <div className="group relative px-3 py-1.5 rounded-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 transition-all duration-300 animate-pulse hover:animate-none cursor-pointer flex items-center gap-1.5 border border-yellow-600/30">
-                      <div className="absolute -inset-1 bg-gradient-to-r from-yellow-500 to-amber-500 rounded-full blur opacity-40 group-hover:opacity-60 transition-opacity"></div>
-                      <Crown className="w-3.5 h-3.5 text-black relative z-10" />
-                      <span className="text-xs font-bold text-black relative z-10 whitespace-nowrap">Go Premium</span>
-                    </div>
-                  ) : (
-                    <div className="h-10 bg-linear-to-r from-emerald-900/30 to-teal-900/30 border border-emerald-600/40 rounded-full px-4 py-1 flex items-center gap-2 hover:from-emerald-900/40 hover:to-teal-900/40 hover:border-emerald-500/60 transition-all cursor-pointer group">
-                      <CreditCard className="h-4 w-4 text-emerald-400 group-hover:scale-110 transition-transform" />
-                      <span className="text-emerald-400 font-semibold text-sm">
-                        {userCredits} <span className="hidden lg:inline">Credits</span>
-                      </span>
-                    </div>
-                  )}
-                </>
+              {!clerkUser ? (
+                <div className="group relative px-3 py-1.5 rounded-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 transition-all duration-300 animate-pulse hover:animate-none cursor-pointer flex items-center gap-1.5 border border-yellow-600/30">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-yellow-500 to-amber-500 rounded-full blur opacity-40 group-hover:opacity-60 transition-opacity"></div>
+                  <Crown className="w-3.5 h-3.5 text-black relative z-10" />
+                  <span className="text-xs font-bold text-black relative z-10 whitespace-nowrap">Go Premium</span>
+                </div>
+              ) : (
+                <div className="h-10 bg-linear-to-r from-emerald-900/30 to-teal-900/30 border border-emerald-600/40 rounded-full px-4 py-1 flex items-center gap-2 hover:from-emerald-900/40 hover:to-teal-900/40 hover:border-emerald-500/60 transition-all cursor-pointer group">
+                  <CreditCard className="h-4 w-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+                  <span className="text-emerald-400 font-semibold text-sm">
+                    {userCredits} <span className="hidden lg:inline">Credits</span>
+                  </span>
+                </div>
               )}
             </Link>
           )}
@@ -200,8 +207,8 @@ export function Header() {
 
           <SignedIn>
             <div className="flex items-center gap-2">
-              {/* User Role Badge (Mobile/Desktop) */}
-              {clerkUser?.publicMetadata?.role && (
+              {/* User Role Badge */}
+              {mounted && clerkUser?.publicMetadata?.role && (
                 <div className={`hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${clerkUser.publicMetadata.role === "DOCTOR"
                     ? "bg-emerald-900/40 border-emerald-600/50 text-emerald-300"
                     : clerkUser.publicMetadata.role === "ADMIN"
@@ -279,11 +286,24 @@ export function Header() {
                     <MessageCircle className="h-5 w-5" />
                     <span className="font-medium">PetChat</span>
                   </Link>
-                  <Link href="/pricing" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-lg bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border border-yellow-500/30 text-yellow-400 hover:from-yellow-500/30 hover:to-amber-500/30 transition-all">
-                    <Crown className="h-5 w-5" />
-                    <span className="font-bold">Go Premium</span>
-                    <ArrowRight className="h-4 w-4 ml-auto" />
-                  </Link>
+
+                  {/* Admin Dashboard in mobile menu */}
+                  {isAdmin && (
+                    <Link href="/admin" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-lg bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 text-purple-300 hover:from-purple-500/30 hover:to-pink-500/30 transition-all">
+                      <LayoutDashboard className="h-5 w-5" />
+                      <span className="font-bold">Dashboard</span>
+                      <ArrowRight className="h-4 w-4 ml-auto" />
+                    </Link>
+                  )}
+
+                  {/* Premium link (not for admins) */}
+                  {!isAdmin && (
+                    <Link href="/pricing" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-lg bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border border-yellow-500/30 text-yellow-400 hover:from-yellow-500/30 hover:to-amber-500/30 transition-all">
+                      <Crown className="h-5 w-5" />
+                      <span className="font-bold">Go Premium</span>
+                      <ArrowRight className="h-4 w-4 ml-auto" />
+                    </Link>
+                  )}
                 </div>
               </div>
             </motion.div>

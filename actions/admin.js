@@ -267,3 +267,141 @@ export async function approvePayout(formData) {
     throw new Error(`Failed to approve payout: ${error.message}`);
   }
 }
+
+/**
+ * Gets admin dashboard statistics
+ */
+export async function getAdminStats() {
+  const isAdmin = await verifyAdmin();
+  if (!isAdmin) throw new Error("Unauthorized");
+
+  try {
+    const [
+      totalUsers,
+      totalDoctors,
+      totalPatients,
+      totalAppointments,
+      completedAppointments,
+      pendingDoctors,
+      totalCreditsData,
+    ] = await Promise.all([
+      db.user.count(),
+      db.user.count({ where: { role: "DOCTOR" } }),
+      db.user.count({ where: { role: "PATIENT" } }),
+      db.appointment.count(),
+      db.appointment.count({ where: { status: "COMPLETED" } }),
+      db.user.count({ where: { role: "DOCTOR", verificationStatus: "PENDING" } }),
+      db.creditTransaction.aggregate({
+        _sum: { amount: true },
+        where: { type: "CREDIT_PURCHASE" },
+      }),
+    ]);
+
+    const totalRevenue = (totalCreditsData._sum.amount || 0) * 10; // $10 per credit
+
+    return {
+      totalUsers,
+      totalDoctors,
+      totalPatients,
+      totalAppointments,
+      completedAppointments,
+      pendingDoctors,
+      totalRevenue,
+    };
+  } catch (error) {
+    console.error("Failed to get admin stats:", error);
+    throw new Error("Failed to fetch admin statistics");
+  }
+}
+
+/**
+ * Gets monthly statistics for charts
+ */
+export async function getMonthlyStats() {
+  const isAdmin = await verifyAdmin();
+  if (!isAdmin) throw new Error("Unauthorized");
+
+  try {
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    const appointments = await db.appointment.findMany({
+      where: {
+        createdAt: { gte: sixMonthsAgo },
+      },
+      select: {
+        createdAt: true,
+        status: true,
+      },
+    });
+
+    const transactions = await db.creditTransaction.findMany({
+      where: {
+        createdAt: { gte: sixMonthsAgo },
+        type: "CREDIT_PURCHASE",
+      },
+      select: {
+        createdAt: true,
+        amount: true,
+      },
+    });
+
+    // Group by month
+    const monthlyData = {};
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date();
+      date.setMonth(date.getMonth() - i);
+      const monthKey = `${months[date.getMonth()]} ${date.getFullYear()}`;
+      monthlyData[monthKey] = { month: months[date.getMonth()], appointments: 0, revenue: 0 };
+    }
+
+    appointments.forEach((apt) => {
+      const monthKey = `${months[apt.createdAt.getMonth()]} ${apt.createdAt.getFullYear()}`;
+      if (monthlyData[monthKey]) {
+        monthlyData[monthKey].appointments++;
+      }
+    });
+
+    transactions.forEach((tx) => {
+      const monthKey = `${months[tx.createdAt.getMonth()]} ${tx.createdAt.getFullYear()}`;
+      if (monthlyData[monthKey]) {
+        monthlyData[monthKey].revenue += tx.amount * 10;
+      }
+    });
+
+    return { data: Object.values(monthlyData) };
+  } catch (error) {
+    console.error("Failed to get monthly stats:", error);
+    throw new Error("Failed to fetch monthly statistics");
+  }
+}
+
+/**
+ * Gets recent appointments for dashboard
+ */
+export async function getRecentAppointments() {
+  const isAdmin = await verifyAdmin();
+  if (!isAdmin) throw new Error("Unauthorized");
+
+  try {
+    const recentAppointments = await db.appointment.findMany({
+      take: 8,
+      orderBy: { createdAt: "desc" },
+      include: {
+        patient: {
+          select: { name: true, email: true, imageUrl: true },
+        },
+        doctor: {
+          select: { name: true, specialty: true },
+        },
+      },
+    });
+
+    return { appointments: recentAppointments };
+  } catch (error) {
+    console.error("Failed to get recent appointments:", error);
+    throw new Error("Failed to fetch recent appointments");
+  }
+}
