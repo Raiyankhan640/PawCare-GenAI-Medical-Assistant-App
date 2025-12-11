@@ -1,4 +1,3 @@
-# PawCare - Viva Preparation Guide
 ## Software Engineering Design Patterns, Architecture & Testing
 
 ---
@@ -265,7 +264,7 @@ If asked about unit testing frameworks, say:
 
 ---
 
-## 5. Quick Reference Table for Viva
+## 5. Quick Reference Table
 
 | Question | Pattern/Concept | File Location |
 |----------|-----------------|---------------|
@@ -295,18 +294,3 @@ If asked about unit testing frameworks, say:
 - **Validation:** Zod
 - **State Management:** React Hooks (useState, useEffect, useCallback)
 
----
-
-## 7. Sample Viva Q&A
-
-**Q: What design patterns did you use?**
-> "I primarily used Singleton for database connection, Repository pattern for data access through server actions, Factory for token generation, Strategy for AI intent detection, and Observer through React's state management."
-
-**Q: How did you ensure code maintainability?**
-> "By following SOLID principles, using a layered architecture, separating concerns between components, actions, and utilities, and implementing caching with proper invalidation."
-
-**Q: What about testing?**
-> "I implemented runtime validation using Zod schemas, a health check API for integration testing, and database connectivity tests. For a production app, I would add Jest for unit tests and Playwright for E2E testing."
-
-**Q: How does the AI chat work?**
-> "The PetChat uses a Strategy pattern - first checking keywords for intent, then falling back to Gemini AI for classification. Messages are stored in PostgreSQL, and the UI uses optimistic updates with the Observer pattern through React state."
