@@ -10,8 +10,8 @@ export async function GET(request) {
     console.log("[API /user/credits] userId:", userId);
     
     if (!userId) {
-      // Return default credits for demo
-      return NextResponse.json({ credits: 10, role: "PATIENT" });
+      // Return null role so header doesn't assume role
+      return NextResponse.json({ credits: 0, role: null });
     }
 
     const user = await db.user.findFirst({
@@ -20,18 +20,19 @@ export async function GET(request) {
     });
 
     if (!user) {
-      console.log("[API /user/credits] No user found, returning defaults");
-      return NextResponse.json({ credits: 10, role: "PATIENT" });
+      console.log("[API /user/credits] No user found, returning null role");
+      // Return null role - user needs to complete onboarding first
+      return NextResponse.json({ credits: 0, role: null });
     }
 
     console.log("[API /user/credits] Found user:", user);
     return NextResponse.json({
-      credits: user.credits ?? 10,
-      role: user.role ?? "PATIENT"
+      credits: user.credits ?? 0,
+      role: user.role ?? null
     });
   } catch (error) {
     console.error("[API /user/credits] Error:", error.message);
-    // Always return valid credits for demo
-    return NextResponse.json({ credits: 10, role: "PATIENT" });
+    // Return null role on error
+    return NextResponse.json({ credits: 0, role: null });
   }
 }

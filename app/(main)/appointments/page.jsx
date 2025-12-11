@@ -9,8 +9,17 @@ import { getCurrentUser } from "@/actions/onboarding";
 export default async function PatientAppointmentsPage() {
   const user = await getCurrentUser();
 
+  // Admin goes to admin dashboard
+  if (user?.role === "ADMIN") {
+    redirect("/admin");
+  }
+  // Doctor goes to doctor dashboard
+  if (user?.role === "DOCTOR") {
+    redirect("/doctor");
+  }
+  // Only allow patients, others go to home
   if (!user || user.role !== "PATIENT") {
-    redirect("/onboarding");
+    redirect("/");
   }
 
   const { appointments, error } = await getPatientAppointments();

@@ -19,9 +19,12 @@ export default async function DoctorDashboardPage() {
       getDoctorPayouts(),
     ]);
 
-  //   // Redirect if not a doctor
+  // Redirect if not a doctor (admin goes to admin dashboard, others to home)
+  if (user?.role === "ADMIN") {
+    redirect("/admin");
+  }
   if (user?.role !== "DOCTOR") {
-    redirect("/onboarding");
+    redirect("/");
   }
 
   // If already verified, redirect to dashboard

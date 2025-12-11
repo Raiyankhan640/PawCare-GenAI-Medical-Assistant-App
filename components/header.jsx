@@ -155,8 +155,8 @@ export function Header() {
               </Link>
             )}
 
-            {/* Unassigned Onboarding - only if no role set in both places */}
-            {(!clerkUser?.publicMetadata?.role || clerkUser?.publicMetadata?.role === "UNASSIGNED") && (!userRole || userRole === "UNASSIGNED") && (
+            {/* Unassigned Onboarding - only if no role set AND not admin */}
+            {!isAdmin && (!clerkUser?.publicMetadata?.role || clerkUser?.publicMetadata?.role === "UNASSIGNED") && (!userRole || userRole === "UNASSIGNED") && (
               <Link
                 href="/onboarding"
                 className={cn(

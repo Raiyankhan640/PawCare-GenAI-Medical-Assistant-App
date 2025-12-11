@@ -1,5 +1,6 @@
 import { verifyAdmin } from "@/actions/admin";
 import { redirect } from "next/navigation";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 
 export const metadata = {
   title: "Admin Dashboard - PawCare",
@@ -7,12 +8,21 @@ export const metadata = {
 };
 
 export default async function AdminLayout({ children }) {
-  // Verify the user has admin access
-  const isAdmin = await verifyAdmin();
+  // Try to get userId directly first
+  let userId = null;
+  try {
+    const authResult = await auth();
+    userId = authResult?.userId;
+  } catch (error) {
+    console.log("[Admin Layout] Auth error:", error.message);
+  }
 
-  // Redirect if not an admin
+  // Verify the user has admin access (passing userId as fallback)
+  const isAdmin = await verifyAdmin(userId);
+
+  // Redirect if not an admin - send to home, not onboarding
   if (!isAdmin) {
-    redirect("/onboarding");
+    redirect("/");
   }
 
   return (
