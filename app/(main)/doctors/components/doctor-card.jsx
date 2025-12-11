@@ -69,7 +69,7 @@ export const DoctorCard = memo(function DoctorCard({ doctor, index = 0 }) {
   );
 
   const profileLink = useMemo(() =>
-    `/doctors/${doctor.specialty}/${doctor.id}`,
+    `/doctors/${encodeURIComponent(doctor.specialty)}/${doctor.id}`,
     [doctor.specialty, doctor.id]
   );
 

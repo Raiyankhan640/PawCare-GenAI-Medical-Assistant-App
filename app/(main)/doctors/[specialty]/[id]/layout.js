@@ -6,8 +6,16 @@ export async function generateMetadata({ params }) {
   const { id } = await params;
 
   const { doctor } = await getDoctorById(id);
+  
+  if (!doctor) {
+    return {
+      title: "Doctor Not Found - PawCare",
+      description: "The requested veterinarian profile could not be found.",
+    };
+  }
+  
   return {
-    title: `Dr. ${doctor.name} - MediMeet`,
+    title: `Dr. ${doctor.name} - PawCare`,
     description: `Book an appointment with Dr. ${doctor.name}, ${doctor.specialty} specialist with ${doctor.experience} years of experience.`,
   };
 }
@@ -23,7 +31,7 @@ export default async function DoctorProfileLayout({ children, params }) {
       <PageHeader
         // icon={<Stethoscope />}
         title={"Dr. " + doctor.name}
-        backLink={`/doctors/${doctor.specialty}`}
+        backLink={`/doctors/${encodeURIComponent(doctor.specialty)}`}
         backLabel={`Back to ${doctor.specialty}`}
       />
 
