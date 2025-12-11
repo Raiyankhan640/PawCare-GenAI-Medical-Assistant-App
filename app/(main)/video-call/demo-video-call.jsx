@@ -70,8 +70,9 @@ export default function DemoVideoCall() {
         videoRef.current.srcObject = stream;
       }
     } catch (error) {
-      console.error("Error accessing camera:", error);
-      toast.error("Could not access camera. Please check permissions.");
+      console.log("Camera access info:", error.message);
+      // Silently handle - no error toast for demo
+      setIsVideoEnabled(false);
     }
   };
 
