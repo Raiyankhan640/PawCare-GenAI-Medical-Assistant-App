@@ -48,11 +48,12 @@ export const TestimonialsSection = forwardRef(function TestimonialsSection(props
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {testimonials.map((testimonial, index) => (
+          {testimonials.map((testimonial) => (
             <Card
-              key={index}
+              key={testimonial.name}
               style={{ opacity: 1, visibility: "visible" }}
               className="testimonial-card border-emerald-900/20 hover:border-emerald-800/40 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-emerald-500/10 cursor-pointer bg-card/50 backdrop-blur-sm relative overflow-hidden group"
+              suppressHydrationWarning
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-bl from-emerald-500/10 to-transparent rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500" />
               <CardContent className="pt-6 relative z-10">
