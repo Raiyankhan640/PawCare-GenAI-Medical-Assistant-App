@@ -1,0 +1,16 @@
+import { Tool } from "langchain/tools";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+export class GeminiTool extends Tool {
+  constructor(apiKey) {
+    super();
+    this.name = "vetai_chat";
+    this.description = "Answer veterinary-related questions about pets, cattle, and farm animals.";
+    this.client = new GoogleGenerativeAI(apiKey).getGenerativeModel({ model: "gemini-1.5-flash" });
+  }
+
+  async _call(input) {
+    const result = await this.client.generateContent(input);
+    return result.response.text();
+  }
+}
