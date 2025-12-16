@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VetAI Assistant</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-layout">
+    
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2>Chats</h2>
+      <div id="chatList" class="chat-list"></div>
+      <button id="newChatButton" class="new-chat-btn">+ New Chat</button>
+    </aside>
+
+    <!-- Main Chat Area -->
+    <div class="main">
+      <header>
+        <h1>🐾 VetAI Assistant</h1>
+        <p>Your smart veterinary guide</p>
+      </header>
+
+      <div class="chat-container">
+        <!-- Messages -->
+        <div class="chat-messages" id="chatMessages"></div>
+
+        <!-- Input bar -->
+        <div class="input-container">
+          <button id="voiceButton" class="control-button" title="Voice Input">🎤</button>
+          <button id="imageButton" class="control-button" title="Upload Image">📷</button>
+          <input type="file" id="imageInput" accept="image/*" style="display: none;">
+          <div id="imagePreviewContainer" class="image-preview-container"></div>
+          <input type="text" id="userInput" placeholder="Type your question here..." autocomplete="off">
+          <button id="sendButton" class="send-button">➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load Google Maps JS API -->
+  <script>
+    const GOOGLE_API_KEY = "AIzaSyDdQXgoFRxsNcZYVsY7MK069zDse8U_6k0"; // replace with your key
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&v=3.56`;
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+  </script>
+
+  <script src="script.js"></script>
+</body>
+</html>

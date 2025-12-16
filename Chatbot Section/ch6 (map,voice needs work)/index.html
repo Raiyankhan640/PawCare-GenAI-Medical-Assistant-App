@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VetAI Assistant</title>
+    <link rel="stylesheet" href="styles.css">
+    <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDdQXgoFRxsNcZYVsY7MK069zDse8U_6k0&libraries=places&loading=async"></script>
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h2>Chats</h2>
+            <div id="chatList" class="chat-list"></div>
+            <button id="newChatButton" class="new-chat-btn">+ New Chat</button>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="main">
+            <header>
+                <h1>🐾 VetAI Assistant</h1>
+                <p>Your smart veterinary guide</p>
+            </header>
+
+            <div class="chat-container">
+                <div id="chatMessages" class="chat-messages"></div>
+
+                <div class="input-container">
+                    <div class="image-preview-container" id="imagePreviewContainer"></div>
+                    <button id="voiceButton" class="control-button" title="Voice Input">🎤</button>
+                    <button id="imageButton" class="control-button" title="Upload Image">📷</button>
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                    <input type="text" id="userInput" placeholder="Ask about pets, cattle, or farm animals...">
+                    <button id="sendButton" class="send-button" title="Send">➤</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
